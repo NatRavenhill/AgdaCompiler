@@ -109,12 +109,9 @@ sound .ℕ (N zero) p (suc n) σ (suc k) ()
 sound .ℕ (N (suc x)) p .(suc x) σ (suc k) refl = refl
 
 --Variables (?)
-sound .ℕ (V x) p n σ k  with σ x
-sound .ℕ (V x) p n σ zero | just v  = {!!}
-sound .ℕ (V x) p n σ (suc k) | just v  = {!!}
-... | nothing  = {!!}
+sound .ℕ (V x) p n σ k  =  {!!}
 
- -- where 
+  where 
 {-   lemma3 : ⟨⟨ [ Var x ] ⟩⟩ [] , σ , k ≡ just [ n ] → σ x ≡ just n
    lemma3 = {!!}-}
 

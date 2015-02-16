@@ -1,0 +1,62 @@
+instr is a type that is the set of all possible instructions:
+
+ - Var is a variable. It is a function that takes a string and returns an instruction
+ - Val is a constant value. It is a function that takes a natural number and returns an instruction
+ - Add and Sub are instructions
+ - Joz is jump on zero. It is a function that takes the number of steps to jump and returns an instruction
+
+Then a program is just a list of instructions. 
+A stack is a list of natural numbers and stores the values in use in the program
+A state contains the values of the variables, so it is a function that takes a string and returns a natural number or nothing. It will return nothing if you try to give a variable that doesn't exist in the memory, so it cannot be executed.
+
+
+The << >> represent the execution of instructions. We give the program, so that it knows what instruction to do next and  the stack and the state so that the instructions can modify both of these. The number tells us what line we are on (?) and then we return a Maybe Stack, so that if the program fails we get nothing and otherwise we get the values currently on the stack as output.
+
+
+<< [] >>, s  _ , _ means we have an empty program, or the entire list of instructions has been consumed, so we just return the stack
+<<_>> s , _ , zero means we have
+<< Val x :: p >> s , o, suc k means we remove the value from the list of instructions, then push x onto the stack
+<< Var x :: p >> s , o , suc k with o k, means that if x is in the state then we add its value to the stack, otherwise we return nothing, because we are referring to a non existent variable.
+<<Add :: p>> (m :: n :: s), o, suc k, means we remove the Add command from the list, then add th top two values on to stack and replace the top two elements with the result of this.
+<<Sub :: p>> (m :: n :: s), o, suc k is the same but with subtraction.
+<<Joz n :: p>> (zero :: s), o suc k, means that zero is at the top of the stack, we go to the nth line, so we drop the next n instructions from the list because we don't need them anymore and remove zero from the top of the stack.
+<< Joz _ :: p >> (suc _ :: s), o, suc k means that zero is not the top of the stack, so we just remove the instruction and do nothing
+<<_>>_ , _ , _ means that anything else is not a valid instruction so can't be exceuted and there is an error in the program, so we just return nothing.
+
+Now we have a data type for expressions.
+B represents a boolean expression, so given a boolean element we can form an expression of this type
+N represents a natural number expression, so given a natural number we can form an expression of this type
+V represents a variable,  so given a String which is the variable name, we can return an integer expression that is the value stored by the variable
+_+_ is the addition of two natural number expressions and returns a natural number expression (so we can apply addition to addition)
+if_then_else takes a boolean expresion to evaluate and two natural number expressions. The one it returns depends on the value of the boolean expression.
+
+The square brackets represent the effects of evaluating these expressions on our states. So it says for all expressions of a certain type, given an expression and a state we can either evaluate that expression, or we get an error.
+[ N(v) ] o will evaluate to just v, which is the value of the numerical expression given
+[ V(s) ] o will check if the value s that the variable contains is in the state.
+[ E + E' ] o will add the values of the expressions when applied to the state. This means that if the expressions are not well formed, or contain variables that do not exist, then it will return nothing.
+[if T then E' else E''] o with [ E ] o checks the value of E and that it is a correct expression and then if it is zero, it is false so we evaluate E'' , if it if it is true, we evaluate E'. Otherwise E is not a valid expression and is nothing, so we just return nothing.
+[_]_ means that anything else is an incorrect expression and can't be evaluated, so we just return nothing.
+
+e0 gives an example of an expression, representing 1 + 1 + x 
+ Then x0 gives us an example of evaluating our expression where mapping any variable to a state just returns nothing and x1 gives us an example where any variable in the state is just 1.
+
+Now if we want to compile a whole program, we give an expression and translate it to a program, which is just a list of instructions. Therefore we can say that for any type, given an expression of that type, we can return a program.
+compile (N n), is the same as just giving a constant value N
+compile (V s) is the same as just giving a variable S  
+compile (E + E') = (compile E ++ compile E') ++ [Add] means we compile the two expressions, so they will be added to the stack, then give an Add insruction, so it will take the results of these two expressions off the top of the stack and add them.
+compile E = [ Err ] means that no other expressions have been defined as instructions, so if given will produce an erroneous instruction.
+
+x2 gives an example of compilation. We execute the list of instructions given by compiling e0, an empty stack and a state function that maps any variable to the value 1 and the number 10.
+
+The list generated by the expression will be <<Val 1 :: Val 1 :: Add :: Var "x" :: Add :: [] >> []
+Then we evaluate Val 1, so we remove it from the list and push it onto the stack. Then we do the same fot the second Val 1. Now we have a stack containing [1,1], so Add pops these from the stack, adds them and pushes the result onto the stack, so it now is [2]. Then we push the value of Var "x" onto the stack. The state function says for any variable, the value will be one, so the stack is now [1,2]. Then Add removes these values and pushes the result onto the stack so it is now [3]. Our list of instructions is now empty, so we return the stack, so the result of our execution is "just [3]".
+
+Our task is to prove the soundness and adequacy of this compiler. The soundness proof says for all expression types, all expressions, all programs, states and ks that if we compile an expression with an empty stack, a given state and a given k, so that we get a stack containg the result back and it does not fail, that this is equiavalent to evaluating the expression with the state and getting the stack back.
+
+Adequacy means that any operation defined in one system can be equivalently defined in the other system and vice versa. Therefore we have a proof of adequacy for when an operation is completed and a proof for when the operation fails.
+
+For adeq, we say that for any set, expression, program, state and result that evaluating an expression with  a state with to get the result n means that for any k the execution of the compilation of the expression with an empty stack, the state and that k will also return the result n.
+
+For adeq-fail we say that for any set, expression, program, state and result that evaluating an expression with a state with to nothing means that for any k the execution of the compilation of the expression with an empty stack, the state and that k will also return nothing.
+
+ 

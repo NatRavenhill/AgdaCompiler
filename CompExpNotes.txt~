@@ -1,0 +1,20 @@
+instr is a type that is the set of all possible instructions:
+
+ - Var is a variable. It is a function that takes a string and returns an instruction
+ - Val is a constant value. It is a function that takes a natural number and returns an instruction
+ - Add and Sub are instructions
+ - Joz is jump on zero. It is a function that takes the number of steps to jump and returns an instruction
+
+Then a program is just a list of instructions. 
+A stack is a list of natural numbers and stores the values in use in the program
+A state is a function that takes a string and returns a natural number or nothing. It will return nothing if there is an error in the program and it cannot be executed.
+
+
+The << >> represent the execution of instructions. We give the program, so that it knows what instruction to do next and  the stack and the state so that the instructions can modify both of these. The number tells us what line we are on (?) and then we return a Maybe Stack, so that if the program fails we get nothing and otherwise we get the values currently on the stack as output.
+
+
+<< [] >>, s  _ , _ means we have an empty program, or the entire list of instructions has been consumed, so we just return the stack
+<<_>> s , _ , zero means we have
+<< Val x :: p >> s , o, suc k means we remove the value from the list of instructions, then push x onto the stack
+
+ 
