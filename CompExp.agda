@@ -6,8 +6,7 @@ open import Data.List
 open import Data.Product
 open import Relation.Binary.PropositionalEquality renaming ([_] to ⟪_⟫)
 open import Data.Maybe
-open import Data.String renaming (_++_ to _^_; show to strshow)
-open import Data.Nat.Show
+open import Data.String renaming (_++_ to _^_)
 
 data instr : Set where
   Var  : String → instr
@@ -21,7 +20,6 @@ data instr : Set where
 program = List instr
 stack   = List ℕ
 state   = String → Maybe ℕ 
-
 
 
 -- Not for natural numbers.
@@ -58,7 +56,6 @@ data Exp : (A : Set) → Set where
 
 
 -- 3. if then else, short-cut logical operators
-
 
 -- 4. times, divide (short-cut?) ... we have no loops though! how would you extend the machine?
 --           simple extension : more operations (boring)
@@ -116,9 +113,6 @@ Example
   just [3]
 -}
 
-
-
-
 --anything that has not been defined in compile will just be Err 
 sound : (T : Set) (e : Exp T) (p : program) (n : ℕ)(σ : state) (k : ℕ) →
         ⟨⟨ compile e ⟩⟩ [] , σ , k ≡ just [ n ] → ⟦ e ⟧ σ ≡ just n 
@@ -133,14 +127,10 @@ sound .ℕ (N zero) p zero σ (suc k) pf = refl
 sound .ℕ (N zero) p (suc n) σ (suc k) ()
 sound .ℕ (N (suc x)) p .(suc x) σ (suc k) refl = refl
 
--- 
---⟨⟨ Var x ∷ p ⟩⟩ s , σ , suc k with σ x
---...                            | just v  = ⟨⟨ p ⟩⟩ (v ∷ s) , σ , k
-
 --Variables (?)
-sound .ℕ (V x) p n σ k q with σ x
-sound .ℕ (V x) p n σ zero () | just v
-sound .ℕ (V x) p n σ (suc k) q | just v = {!!}
+sound .ℕ (V x) p n σ k  with σ x
+sound .ℕ (V x) p n σ zero | just v  = {!!}
+sound .ℕ (V x) p n σ (suc k) | just v  = {!!}
 ... | nothing  = {!!}
 
  -- where 
@@ -167,6 +157,4 @@ adeq .ℕ (if_then_else e e₁ e₂) p σ n x = {!!}
 adeq-fail : (T : Set) (e : Exp T) (p : program) (σ : state) (n : ℕ) →
         ⟦ e ⟧ σ ≡ nothing → (∃ λ k → ⟨⟨ compile e ⟩⟩ [] , σ , k ≡ nothing)
 adeq-fail = {!!}
-
-
 
