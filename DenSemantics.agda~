@@ -1,0 +1,41 @@
+--------------------------------------------------------------------
+-- This module contains the Denotational Semantics for AbstractSyntax.agda --
+-- authors: Matthew Thompson, Natalie Ravenhill, Yu-Yang Lin      --
+--------------------------------------------------------------------
+module DenSemantics where
+
+open import Data.Nat
+open import Data.Bool renaming (Bool to 𝔹; _∧_ to oldand)
+open import Data.List 
+open import Data.Product
+open import Relation.Binary.PropositionalEquality renaming ([_] to ⟪_⟫)
+open import Data.Maybe
+open import Data.String renaming (_++_ to _^_)
+
+-- module imports for the Expressions.
+open import AbstractSyntax
+
+⟦_⟧ : ∀ {T} → Exp T → state → Maybe ℕ
+⟦ B( true ) ⟧ σ = just (suc zero)
+⟦ B( false ) ⟧ σ = just zero
+⟦ N(v) ⟧ σ = just v
+⟦ V(s) ⟧ σ = σ s
+⟦ E ⊕ E' ⟧ σ = ⟦ E ⟧ σ +' ⟦ E' ⟧ σ where
+  _+'_ : Maybe ℕ → Maybe ℕ → Maybe ℕ
+  just m +' just n = just (m + n)
+  _      +'      _ = nothing
+
+⟦ if E then E′ else E″ ⟧ σ with ⟦ E ⟧ σ
+...  | just zero    = ⟦ E″ ⟧ σ
+...  | just (suc _) = ⟦ E′ ⟧ σ
+...  | nothing      = nothing
+--⟦ _ ⟧ _ = nothing
+
+e0 : Exp ℕ
+e0 =  N(1) ⊕ N(1) ⊕ V("x")
+
+x0 : Maybe ℕ
+x0 = ⟦ e0 ⟧ (λ v → nothing)
+
+x1 : Maybe ℕ
+x1 = ⟦ e0 ⟧ (λ v → just 1)

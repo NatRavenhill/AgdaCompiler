@@ -6,6 +6,11 @@ open import Data.Maybe
 open import Data.String renaming (_++_ to _^_; show to strshow)
 open import Data.Nat.Show
 
+-- IMPORTS FOR THE STACK MACHINE
+open import CompExp
+open import AbstractSyntax
+open import DenSemantics
+
 testiffalse : Exp ℕ
 testiffalse = (if (N( 0 )) then (N(1) ⊕ N(1)) else) (N ( 4 ))
 
