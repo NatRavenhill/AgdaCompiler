@@ -65,9 +65,10 @@ infixr 5 _orN_
 ⟨⟨ Joz _ ∷ p ⟩⟩ (suc _ ∷ s) , σ , suc k    = ⟨⟨ p ⟩⟩ s , σ , k
 ⟨⟨ _ ⟩⟩ _ , _ , _ = nothing 
 
-
 -- Compile takes an expression and returns a program (list of instructions).
 compile : ∀ {T} → Exp T → program
+compile (B true) = [ Val (suc zero) ]
+compile (B false)= [ Val zero ]
 compile (N n)    = [ Val n ]
 compile (V s)    = [ Var s ]
 compile (E ⊕ E') = (compile E ++ compile E') ++ [ Add ]
@@ -75,12 +76,24 @@ compile (E ⊝ E') = (compile E ++ compile E') ++ [ Sub ]
 compile ( ¬ E )  = compile E ++ [ Not ]
 compile (E & E') = compile E ++ compile E' ++ [ And ]
 compile (E ∥ E') = compile E ++ compile E' ++ [ Or ]
+
+compile (E <= E') = compile E' ++ [ Val (suc zero) ] ++ [ Add ] ++ compile E  ++ [ Sub ]
+compile (E >= E') = compile E  ++ [ Val (suc zero) ] ++ [ Add ] ++ compile E' ++ [ Sub ]
+compile (E == E') = sub1 ++ sub2 ++ [ And ]
+    where
+    e1 = compile E
+    e2 = compile E'
+    sub1 = e1 ++ [ Val (suc zero) ] ++ [ Add ] ++ e2  ++ [ Sub ]
+    sub2 = e2 ++ [ Val (suc zero) ] ++ [ Add ] ++ e1  ++ [ Sub ]
+-- DO NOT BUILD ON EXPRESSIONS, ONLY REDUCE TO MACHINE OPERATIONS.
+
 compile (if E then E' else  E'') = e ++ [ Joz (length p') ] ++ p' ++ e ++ [ Not ] ++ [ Joz (length p'') ] ++ p''
     where
     e = compile E
     p' = compile E'
     p'' = compile E''
-compile E        = [ Err ]
+
+--compile E = [ Err ]
 
 {-
 Example

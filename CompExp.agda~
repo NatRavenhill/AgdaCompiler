@@ -37,7 +37,7 @@ notN : ℕ -> ℕ
 notN zero = suc zero
 notN (suc n) = zero
 
-_andN_ : ℕ -> ℕ -> ℕ
+_andN_ : ℕ → ℕ → ℕ
 zero andN _ = zero
 suc(_) andN m = m
 

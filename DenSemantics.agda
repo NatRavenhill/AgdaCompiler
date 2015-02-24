@@ -47,11 +47,25 @@ open import CompExp
   just m ∥' just n = just (m orN n)
   _      ∥' _      = nothing
 
+⟦ E <= E' ⟧ σ = ⟦ E ⟧ σ <=' ⟦ E' ⟧ σ where
+  _<='_ : Maybe ℕ → Maybe ℕ → Maybe ℕ
+  just m <=' just n = just ((suc n) ∸ m)
+  _      <=' _      = nothing
+
+⟦ E >= E' ⟧ σ = ⟦ E ⟧ σ >=' ⟦ E' ⟧ σ where
+  _>='_ : Maybe ℕ → Maybe ℕ → Maybe ℕ
+  just m >=' just n = just ((suc m) ∸ n)
+  _      >=' _      = nothing
+
+⟦ E == E' ⟧ σ = ⟦ E ⟧ σ ==' ⟦ E' ⟧ σ where
+  _=='_ : Maybe ℕ → Maybe ℕ → Maybe ℕ
+  just m ==' just n = just (((suc m) ∸ n) andN ((suc n) ∸ m))
+  _      ==' _      = nothing
+
 ⟦ if E then E′ else E″ ⟧ σ with ⟦ E ⟧ σ
 ...  | just zero    = ⟦ E″ ⟧ σ
 ...  | just (suc _) = ⟦ E′ ⟧ σ
 ...  | nothing      = nothing
-
 
 --⟦ _ ⟧ _ = nothing
 
