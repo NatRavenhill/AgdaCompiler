@@ -25,6 +25,11 @@ open import CompExp
   _+'_ : Maybe ℕ → Maybe ℕ → Maybe ℕ
   just m +' just n = just (m + n)
   _      +'      _ = nothing
+⟦ E ⊝ E' ⟧ σ = ⟦ E ⟧ σ -' ⟦ E' ⟧ σ where
+ _-'_ : Maybe ℕ → Maybe ℕ → Maybe ℕ 
+ just m -' just n = just (m ∸ n)
+ _  -' _ = nothing
+
 
 ⟦ if E then E′ else E″ ⟧ σ with ⟦ E ⟧ σ
 ...  | just zero    = ⟦ E″ ⟧ σ

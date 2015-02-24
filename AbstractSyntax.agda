@@ -17,6 +17,7 @@ data Exp : (A : Set) → Set where
   N   : ℕ → Exp ℕ
   V   : String → Exp ℕ 
   _⊕_ : Exp ℕ → Exp ℕ → Exp ℕ
+  _⊝_ : Exp ℕ → Exp ℕ → Exp ℕ 
 -- 1. minus,
 -- 2. and, or, not 
 
@@ -31,3 +32,4 @@ data Exp : (A : Set) → Set where
 --           simple extension : more operations (boring)
 --           complex extension : more control
 infixl 5 _⊕_
+infixl 5 _⊝_
