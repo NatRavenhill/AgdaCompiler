@@ -1,7 +1,7 @@
---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
 -- This module contains the compiler and stack-machine for AbstractSyntax.agda --
--- authors: Matthew Thompson, Natalie Ravenhill, Yu-Yang Lin                  --
---------------------------------------------------------------------------------
+-- authors: Matthew Thompson, Natalie Ravenhill, Yu-Yang Lin                   --
+---------------------------------------------------------------------------------
 module CompExp where
 
 open import Data.Nat
@@ -20,7 +20,7 @@ data instr : Set where
   Var  : String → instr
   Val  : ℕ → instr
   Add  : instr
-  Not : instr
+  Not  : instr
   Sub  : instr
   Joz  : ℕ → instr
   Err  : instr
@@ -50,10 +50,13 @@ notN (suc n) = zero
 ⟨⟨ Joz _ ∷ p ⟩⟩ (suc _ ∷ s) , σ , suc k    = ⟨⟨ p ⟩⟩ s , σ , k
 ⟨⟨ _ ⟩⟩ _ , _ , _ = nothing 
 
+
+-- Compile takes an expression and returns a program (list of instructions).
 compile : ∀ {T} → Exp T → program
 compile (N n)    = [ Val n ]
 compile (V s)    = [ Var s ]
 compile (E ⊕ E') = (compile E ++ compile E') ++ [ Add ]
+compile (E ⊝ E') = (compile E ++ compile E') ++ [ Sub ]
 compile (if E then E' else  E'') = e ++ [ Joz (length p') ] ++ p' ++ e ++ [ Not ] ++ [ Joz (length p'') ] ++ p''
     where
     e = compile E

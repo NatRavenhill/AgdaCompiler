@@ -51,6 +51,8 @@ sound .ℕ (e ⊕ e₁) p n σ k = {!!}
 --Conditionals (?)
 -- ⟨⟨ [ Err ] ⟩⟩ [] , σ , k ≡ just [ n ] →  (⟦ if e then e₁ else e₂ ⟧ σ | ⟦ e ⟧ σ) ≡ just n
 sound .ℕ (if_then_else e e₁ e₂) p n σ k = {!!}
+
+sound _ _ _ _ _ _ _ = {!!}
   
 ------------------------
 -- PROOF FOR ADEQUACY --
@@ -62,6 +64,8 @@ adeq .ℕ (N x) p σ n x₁ = {!!}
 adeq .ℕ (V x) p σ n x₁ = {!!}
 adeq .ℕ (e ⊕ e₁) p σ n x = {!!}
 adeq .ℕ (if_then_else e e₁ e₂) p σ n x = {!!}
+
+adeq _ _ _ _ _ _ = {!!} 
               
 adeq-fail : (T : Set) (e : Exp T) (p : program) (σ : state) (n : ℕ) →
         ⟦ e ⟧ σ ≡ nothing → (∃ λ k → ⟨⟨ compile e ⟩⟩ [] , σ , k ≡ nothing)

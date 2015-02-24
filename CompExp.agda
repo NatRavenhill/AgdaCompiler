@@ -1,7 +1,7 @@
---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
 -- This module contains the compiler and stack-machine for AbstractSyntax.agda --
--- authors: Matthew Thompson, Natalie Ravenhill, Yu-Yang Lin                  --
---------------------------------------------------------------------------------
+-- authors: Matthew Thompson, Natalie Ravenhill, Yu-Yang Lin                   --
+---------------------------------------------------------------------------------
 module CompExp where
 
 open import Data.Nat
@@ -20,7 +20,7 @@ data instr : Set where
   Var  : String → instr
   Val  : ℕ → instr
   Add  : instr
-  Not : instr
+  Not  : instr
   Sub  : instr
   And : instr
   Joz  : ℕ → instr

@@ -12,6 +12,7 @@ open import Relation.Binary.PropositionalEquality renaming ([_] to ⟪_⟫)
 open import Data.Maybe
 open import Data.String renaming (_++_ to _^_)
 
+-- Stuff used for the proofs.
 open import AbstractSyntax
 open import DenSemantics
 open import CompExp

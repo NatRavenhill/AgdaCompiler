@@ -18,19 +18,21 @@ data Exp : (A : Set) → Set where
   V   : String → Exp ℕ 
   _⊕_ : Exp ℕ → Exp ℕ → Exp ℕ
   _⊝_ : Exp ℕ → Exp ℕ → Exp ℕ 
--- 1. minus,
--- 2. and, or, not 
   ¬   : Exp ℕ -> Exp ℕ
-  _&_   : Exp ℕ -> Exp ℕ -> Exp ℕ
+  _&_ : Exp ℕ -> Exp ℕ -> Exp ℕ
+
+-- 2. or
+
 -- ≤ ≥ =
 
+-- 3. if then else, short-cut logical operators
   if_then_else : Exp ℕ → Exp ℕ → Exp ℕ → Exp ℕ -- added by Matthew
 
-
--- 3. if then else, short-cut logical operators
-
 -- 4. times, divide (short-cut?) ... we have no loops though! how would you extend the machine?
+  
 --           simple extension : more operations (boring)
 --           complex extension : more control
+-- maybe define while-loop
 infixl 5 _⊕_
 infixl 5 _⊝_
+infixl 5 _&_
