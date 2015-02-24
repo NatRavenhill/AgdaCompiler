@@ -20,7 +20,7 @@ data Exp : (A : Set) → Set where
   _⊝_ : Exp ℕ → Exp ℕ → Exp ℕ 
 -- 1. minus,
 -- 2. and, or, not 
-
+  ¬   : ℕ -> Exp ℕ
 -- ≤ ≥ =
 
   if_then_else : Exp ℕ → Exp ℕ → Exp ℕ → Exp ℕ -- added by Matthew
