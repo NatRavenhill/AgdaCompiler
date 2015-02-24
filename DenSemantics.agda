@@ -26,6 +26,9 @@ open import CompExp
   just m +' just n = just (m + n)
   _      +'      _ = nothing
 
+⟦ ¬( zero ) ⟧ σ = just (suc zero)
+⟦ ¬( suc _) ⟧ σ = just zero
+
 ⟦ if E then E′ else E″ ⟧ σ with ⟦ E ⟧ σ
 ...  | just zero    = ⟦ E″ ⟧ σ
 ...  | just (suc _) = ⟦ E′ ⟧ σ
