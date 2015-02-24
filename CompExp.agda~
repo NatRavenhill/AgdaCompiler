@@ -20,8 +20,10 @@ data instr : Set where
   Var  : String → instr
   Val  : ℕ → instr
   Add  : instr
+  Or   : instr
   Not  : instr
   Sub  : instr
+  And  : instr
   Joz  : ℕ → instr
   Err  : instr
 
@@ -30,10 +32,21 @@ program = List instr
 stack   = List ℕ
 state   = String → Maybe ℕ 
 
--- Not for natural numbers.
+-- Operation for natural numbers
 notN : ℕ -> ℕ
 notN zero = suc zero
 notN (suc n) = zero
+
+_andN_ : ℕ -> ℕ -> ℕ
+zero andN _ = zero
+suc(_) andN m = m
+
+_orN_ : ℕ → ℕ → ℕ
+_orN_ zero    n = n
+_orN_ (suc n) _ = (suc n)
+
+infixr 6 _andN_
+infixr 5 _orN_
 
 -- THIS IS THE STACK MACHINE, TRY NOT TO CHANGE IT.
 ⟨⟨_⟩⟩_,_,_ : program → stack → state → ℕ → Maybe stack 
@@ -45,7 +58,9 @@ notN (suc n) = zero
 ...                            | nothing = nothing
 ⟨⟨ Add ∷ p ⟩⟩ (m ∷ n ∷ s) , σ , suc k      = ⟨⟨ p ⟩⟩ (m + n ∷ s) , σ , k
 ⟨⟨ Sub ∷ p ⟩⟩ (m ∷ n ∷ s) , σ , suc k      = ⟨⟨ p ⟩⟩ (m ∸ n ∷ s) , σ , k
-⟨⟨ Not ∷ p ⟩⟩ (b ∷ s) , σ , suc k              = ⟨⟨ p ⟩⟩ (notN b ∷ s) , σ , k
+⟨⟨ Not ∷ p ⟩⟩ (b ∷ s)     , σ , suc k      = ⟨⟨ p ⟩⟩ (notN b ∷ s) , σ , k
+⟨⟨ And ∷ p ⟩⟩ (m ∷ n ∷ s) , σ , suc k      = ⟨⟨ p ⟩⟩ (m andN n ∷ s) , σ , k 
+⟨⟨ Or  ∷ p ⟩⟩ (m ∷ n ∷ s) , σ , suc k      = ⟨⟨ p ⟩⟩ ((m orN n) ∷ s) , σ , k 
 ⟨⟨ Joz n ∷ p ⟩⟩ (zero  ∷ s) , σ , suc k    = ⟨⟨ drop n p ⟩⟩ s , σ , k
 ⟨⟨ Joz _ ∷ p ⟩⟩ (suc _ ∷ s) , σ , suc k    = ⟨⟨ p ⟩⟩ s , σ , k
 ⟨⟨ _ ⟩⟩ _ , _ , _ = nothing 
@@ -57,6 +72,9 @@ compile (N n)    = [ Val n ]
 compile (V s)    = [ Var s ]
 compile (E ⊕ E') = (compile E ++ compile E') ++ [ Add ]
 compile (E ⊝ E') = (compile E ++ compile E') ++ [ Sub ]
+compile ( ¬ E )  = compile E ++ [ Not ]
+compile (E & E') = compile E ++ compile E' ++ [ And ]
+compile (E ∥ E') = compile E ++ compile E' ++ [ Or ]
 compile (if E then E' else  E'') = e ++ [ Joz (length p') ] ++ p' ++ e ++ [ Not ] ++ [ Joz (length p'') ] ++ p''
     where
     e = compile E
