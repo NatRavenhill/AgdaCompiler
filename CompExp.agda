@@ -56,6 +56,7 @@ compile : ∀ {T} → Exp T → program
 compile (N n)    = [ Val n ]
 compile (V s)    = [ Var s ]
 compile (E ⊕ E') = (compile E ++ compile E') ++ [ Add ]
+compile (E ⊝ E') = (compile E ++ compile E') ++ [ Sub ]
 compile (if E then E' else  E'') = e ++ [ Joz (length p') ] ++ p' ++ e ++ [ Not ] ++ [ Joz (length p'') ] ++ p''
     where
     e = compile E

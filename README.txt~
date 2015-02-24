@@ -1,0 +1,8 @@
+Structure is as follows:
+- AbstractSyntax : Base module, doesn't import anything from the
+hierarchy.
+- CompExp : Only uses AbstractSyntax.
+- DenSemantics : Uses AbstractSyntax and CompExp for both the Stack
+Machine definition and the syntax.
+- Proofs : Uses AbstractSyntax, CompExp, and DenSemantics. Puts
+everything together to form proofs for the stack machine's compiler.
