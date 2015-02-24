@@ -43,10 +43,8 @@ open import CompExp
 
 ⟦ E & E' ⟧ σ = ⟦ E ⟧ σ &' ⟦ E' ⟧ σ where
   _&'_ : Maybe ℕ -> Maybe ℕ -> Maybe ℕ
-  nothing &' _ = nothing
-  _ &' nothing = nothing
-  just (suc _) &' just m = just m
-  just zero &' _ = just zero
+  just m &' just n = just (m andN n)
+  _ &' _ = nothing
 
 --⟦ _ ⟧ _ = nothing
 

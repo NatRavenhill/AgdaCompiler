@@ -22,6 +22,7 @@ data instr : Set where
   Add  : instr
   Not : instr
   Sub  : instr
+  And : instr
   Joz  : ℕ → instr
   Err  : instr
 
@@ -35,6 +36,10 @@ notN : ℕ -> ℕ
 notN zero = suc zero
 notN (suc n) = zero
 
+_andN_ : ℕ -> ℕ -> ℕ
+zero andN _ = zero
+suc(_) andN m = m
+
 -- THIS IS THE STACK MACHINE, TRY NOT TO CHANGE IT.
 ⟨⟨_⟩⟩_,_,_ : program → stack → state → ℕ → Maybe stack 
 ⟨⟨ [] ⟩⟩ s , _ , _                         = just s
@@ -46,6 +51,7 @@ notN (suc n) = zero
 ⟨⟨ Add ∷ p ⟩⟩ (m ∷ n ∷ s) , σ , suc k      = ⟨⟨ p ⟩⟩ (m + n ∷ s) , σ , k
 ⟨⟨ Sub ∷ p ⟩⟩ (m ∷ n ∷ s) , σ , suc k      = ⟨⟨ p ⟩⟩ (m ∸ n ∷ s) , σ , k
 ⟨⟨ Not ∷ p ⟩⟩ (b ∷ s) , σ , suc k              = ⟨⟨ p ⟩⟩ (notN b ∷ s) , σ , k
+⟨⟨ And ∷ p ⟩⟩ (m ∷ n ∷ s) , σ , suc k      = ⟨⟨ p ⟩⟩ (m andN n ∷ s) , σ , k 
 ⟨⟨ Joz n ∷ p ⟩⟩ (zero  ∷ s) , σ , suc k    = ⟨⟨ drop n p ⟩⟩ s , σ , k
 ⟨⟨ Joz _ ∷ p ⟩⟩ (suc _ ∷ s) , σ , suc k    = ⟨⟨ p ⟩⟩ s , σ , k
 ⟨⟨ _ ⟩⟩ _ , _ , _ = nothing 
@@ -57,6 +63,8 @@ compile (N n)    = [ Val n ]
 compile (V s)    = [ Var s ]
 compile (E ⊕ E') = (compile E ++ compile E') ++ [ Add ]
 compile (E ⊝ E') = (compile E ++ compile E') ++ [ Sub ]
+compile ( ¬ E ) = compile E ++ [ Not ]
+compile (E & E') = compile E ++ compile E' ++ [ And ]
 compile (if E then E' else  E'') = e ++ [ Joz (length p') ] ++ p' ++ e ++ [ Not ] ++ [ Joz (length p'') ] ++ p''
     where
     e = compile E
