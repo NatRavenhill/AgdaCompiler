@@ -50,6 +50,8 @@ notN (suc n) = zero
 ⟨⟨ Joz _ ∷ p ⟩⟩ (suc _ ∷ s) , σ , suc k    = ⟨⟨ p ⟩⟩ s , σ , k
 ⟨⟨ _ ⟩⟩ _ , _ , _ = nothing 
 
+
+-- Compile takes an expression and returns a program (list of instructions).
 compile : ∀ {T} → Exp T → program
 compile (N n)    = [ Val n ]
 compile (V s)    = [ Var s ]

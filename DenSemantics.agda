@@ -26,13 +26,23 @@ open import CompExp
   just m +' just n = just (m + n)
   _      +'      _ = nothing
 
-⟦ ¬( zero ) ⟧ σ = just (suc zero)
-⟦ ¬( suc _) ⟧ σ = just zero
+⟦ ¬( E ) ⟧ σ with ⟦ E ⟧ σ
+... | just zero = just (suc zero)
+... | just (suc _) = just zero
+... | nothing = nothing
 
 ⟦ if E then E′ else E″ ⟧ σ with ⟦ E ⟧ σ
 ...  | just zero    = ⟦ E″ ⟧ σ
 ...  | just (suc _) = ⟦ E′ ⟧ σ
 ...  | nothing      = nothing
+
+⟦ E & E' ⟧ σ = ⟦ E ⟧ σ &' ⟦ E' ⟧ σ where
+  _&'_ : Maybe ℕ -> Maybe ℕ -> Maybe ℕ
+  nothing &' _ = nothing
+  _ &' nothing = nothing
+  just (suc _) &' just m = just m
+  just zero &' _ = just zero
+
 --⟦ _ ⟧ _ = nothing
 
 e0 : Exp ℕ
@@ -46,3 +56,11 @@ x1 = ⟦ e0 ⟧ (λ v → just 1)
 
 x2 : Maybe stack
 x2 = ⟨⟨ compile e0 ⟩⟩ [] , (λ v → just 1) , 10
+
+if1 : Maybe stack
+if1 = ⟨⟨ compile ((if N(0) then N(4) else) (N(3)) ) ⟩⟩ [] , (λ x -> just 0) , 999
+
+
+
+
+
