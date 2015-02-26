@@ -67,7 +67,7 @@ open import CompExp
 ...  | just (suc _) = ⟦ E′ ⟧ σ
 ...  | nothing      = nothing
 
---⟦ _ ⟧ _ = nothing
+⟦ _ ⟧ _ = nothing
 
 e0 : Exp ℕ
 e0 =  N(1) ⊕ N(1) ⊕ V("x")
@@ -83,8 +83,3 @@ x2 = ⟨⟨ compile e0 ⟩⟩ [] , (λ v → just 1) , 10
 
 if1 : Maybe stack
 if1 = ⟨⟨ compile ((if N(0) then N(4) else) (N(3)) ) ⟩⟩ [] , (λ x -> just 0) , 999
-
-
-
-
-

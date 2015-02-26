@@ -25,6 +25,7 @@ data instr : Set where
   Sub  : instr
   And  : instr
   Joz  : ℕ → instr
+  Loop : ℕ → instr
   Err  : instr
 
 -- DEFINITIONS FOR THE STACK MACHINE.
@@ -63,6 +64,8 @@ infixr 5 _orN_
 ⟨⟨ Or  ∷ p ⟩⟩ (m ∷ n ∷ s) , σ , suc k      = ⟨⟨ p ⟩⟩ ((m orN n) ∷ s) , σ , k 
 ⟨⟨ Joz n ∷ p ⟩⟩ (zero  ∷ s) , σ , suc k    = ⟨⟨ drop n p ⟩⟩ s , σ , k
 ⟨⟨ Joz _ ∷ p ⟩⟩ (suc _ ∷ s) , σ , suc k    = ⟨⟨ p ⟩⟩ s , σ , k
+⟨⟨ Loop n ∷ p ⟩⟩ (zero  ∷ s) , σ , suc k   = ⟨⟨ drop n p ⟩⟩ s , σ , k
+⟨⟨ Loop n ∷ p ⟩⟩ (suc _ ∷ s) , σ , suc k   = ⟨⟨ (take n p) ++ Loop n ∷ p ⟩⟩ s , σ , k
 ⟨⟨ _ ⟩⟩ _ , _ , _ = nothing 
 
 -- Compile takes an expression and returns a program (list of instructions).
@@ -81,17 +84,31 @@ compile (E <= E') = compile E' ++ [ Val (suc zero) ] ++ [ Add ] ++ compile E  ++
 compile (E >= E') = compile E  ++ [ Val (suc zero) ] ++ [ Add ] ++ compile E' ++ [ Sub ]
 compile (E == E') = sub1 ++ sub2 ++ [ And ]
     where
-    e1 = compile E
-    e2 = compile E'
-    sub1 = e1 ++ [ Val (suc zero) ] ++ [ Add ] ++ e2  ++ [ Sub ]
-    sub2 = e2 ++ [ Val (suc zero) ] ++ [ Add ] ++ e1  ++ [ Sub ]
+      e1 = compile E
+      e2 = compile E'
+      sub1 = e1 ++ [ Val (suc zero) ] ++ [ Add ] ++ e2  ++ [ Sub ]
+      sub2 = e2 ++ [ Val (suc zero) ] ++ [ Add ] ++ e1  ++ [ Sub ]
 -- DO NOT BUILD ON EXPRESSIONS, ONLY REDUCE TO MACHINE OPERATIONS.
 
 compile (if E then E' else  E'') = e ++ [ Joz (length p') ] ++ p' ++ e ++ [ Not ] ++ [ Joz (length p'') ] ++ p''
     where
-    e = compile E
-    p' = compile E'
-    p'' = compile E''
+      e = compile E
+      p' = compile E'
+      p'' = compile E''
+
+--compile (while E do E') = {!compile E' ++ while!} -- I CANT FIGURE THIS ONE OUT YET (YU-YANG)
+
+compile (for E do E') = e ++ [ Loop (length p) ] ++ p
+    where
+      e  = compile E
+      p  = compile E' ++ e ++ [ Val (suc zero) ] ++ [ Sub ]
+
+compile (E ×× E') = e1 ++ [ Joz (length p') ] ++ p' ++ e1 ++ [ Not ] ++ [ Joz 1 ] ++ [ Val zero ]
+    where
+      e1 = compile E
+      e2 = compile E'
+      p  = e2 ++ e2 ++ [ Add ] ++ e1 ++ [ Val (suc zero) ] ++ [ Sub ]
+      p' = [ Loop (length p) ] ++ p
 
 --compile E = [ Err ]
 
