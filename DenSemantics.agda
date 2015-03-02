@@ -83,3 +83,12 @@ x2 = ⟨⟨ compile e0 ⟩⟩ [] , (λ v → just 1) , 10
 
 if1 : Maybe stack
 if1 = ⟨⟨ compile ((if N(0) then N(4) else) (N(3)) ) ⟩⟩ [] , (λ x -> just 0) , 999
+
+subt : Maybe stack
+subt = ⟨⟨ compile ((N 28) ⊝ (N 6)) ⟩⟩ [] , (λ x -> just 0) , 999
+
+timest : Maybe stack
+timest = ⟨⟨ compile ((N 28) ×× (N 62)) ⟩⟩ [] , (λ x -> just 0) , 999
+
+-- TO TEST: (YU-YANG)
+-- gte, lte, eq, for.

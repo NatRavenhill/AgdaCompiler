@@ -67,7 +67,7 @@ open import CompExp
 ...  | just (suc _) = ⟦ E′ ⟧ σ
 ...  | nothing      = nothing
 
---⟦ _ ⟧ _ = nothing
+⟦ _ ⟧ _ = nothing
 
 e0 : Exp ℕ
 e0 =  N(1) ⊕ N(1) ⊕ V("x")
