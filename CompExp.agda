@@ -25,7 +25,7 @@ data instr : Set where
   Sub  : instr
   And  : instr
   Joz  : ℕ → instr
-  FLoop : (ℕ → 𝔹) → (ℕ → ℕ) → ℕ → instr
+  FLoop : (List ℕ → 𝔹) → (ℕ → ℕ) → ℕ → instr
   Err  : instr
 
 -- DEFINITIONS FOR THE STACK MACHINE.
@@ -77,8 +77,8 @@ infixr 5 _orN_
 -- FLOOP takes the next n instructions and repeats them M times, where M = top of stack.
 --  Drops them if stack top is zero.
 --  Repeats them if stack top M is not zero. Then adds M-1 to top of stack.
-⟨⟨ FLoop c f n ∷ p ⟩⟩ (v ∷ s) , σ , suc k with c v
-⟨⟨ FLoop c f n ∷ p ⟩⟩ v ∷ s , σ , suc k | true  = ⟨⟨ (take n p) ++ [ Val (f v) ] ++ FLoop c f n ∷ p ⟩⟩ s , σ , k
+⟨⟨ FLoop c f n ∷ p ⟩⟩ (v ∷ s) , σ , suc k with c (v ∷ s)
+⟨⟨ FLoop c f n ∷ p ⟩⟩ v ∷ s , σ , suc k | true  = ⟨⟨ (take n p) ++ [ Val (f  v) ] ++ FLoop c f n ∷ p ⟩⟩ s , σ , k
 ⟨⟨ FLoop c f n ∷ p ⟩⟩ v ∷ s , σ , suc k | false = ⟨⟨ drop n p ⟩⟩ s , σ , k 
 
 ⟨⟨ _ ⟩⟩ _ , _ , _ = nothing 
@@ -143,11 +143,27 @@ compile (E ×× E') = e1 ++ [ Joz (length p') ] ++ p' ++
       e1 = [ Val (suc zero) ] ++ compile E ++ [ Sub ]
       e2 = compile E'
       p  = e2 ++ [ Add ]
-      c  = λ n → (0 <' n)
+      c : List ℕ → 𝔹
+      c (x ∷ _) = 0 <' x
+      c _         = false
       f  = λ n → n ∸ 1
       p' = e2 ++ e1 ++ [ FLoop c f (length p) ] ++ p
 
+-- For now assume good params
+--compile (E // E') = {!!}
+--    where
+--      e1 = compile E
+--      e2 = compile E'
+--      p = e2 ++ [ Sub ]
+--      c : List ℕ → 𝔹
+--      c (j ∷ a ∷ b ∷ s) = (j * b) <' a
+--      c _                    = false
+--      f = λ n → n + 1
+--      p' = [ Val zero ] ++ e1 ++ [ FLoop c f (length p) ] ++ p
+
 compile E = [ Err ]
+
+
 
 {-
 Example
