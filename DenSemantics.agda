@@ -95,7 +95,7 @@ subt : Maybe stack
 subt = ⟨⟨ compile ((N 28) ⊝ (N 6)) ⟩⟩ [] , (λ x -> just 0) , 999
 
 timest : Maybe stack
-timest = ⟨⟨ compile ((N 28) ×× (N 62)) ⟩⟩ [] , (λ x -> just 0) , 999
+timest = ⟨⟨ compile ((N 28) ×× (N 123)) ⟩⟩ [] , (λ x -> just 0) , 999
 
 gtet : Maybe stack
 gtet = ⟨⟨ compile ((N 62) >= (N 62)) ⟩⟩ [] , (λ x -> just 0) , 999
@@ -105,7 +105,7 @@ ltet = ⟨⟨ compile ((N 63) <= (N 62)) ⟩⟩ [] , (λ x -> just 0) , 999
 
 eqt1 : Maybe stack
 eqt1 = ⟨⟨ compile ((N 212321) == (N 22)) ⟩⟩ [] , (λ x -> just 0) , 999
-
+ 
 eqt2 : Maybe stack
 eqt2 = ⟨⟨ compile ((N 1234) == (N 1234)) ⟩⟩ [] , (λ x -> just 0) , 999
 -- TO TEST: (YU-YANG)

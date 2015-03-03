@@ -34,36 +34,40 @@ stack   = List ℕ
 state   = String → Maybe ℕ 
 
 -- Operation for natural numbers
+ℕto𝔹 : ℕ → ℕ
+ℕto𝔹 zero  = zero
+ℕto𝔹 (suc _) = suc zero
+
 notN : ℕ -> ℕ
 notN zero = suc zero
 notN (suc n) = zero
 
 _andN_ : ℕ → ℕ → ℕ
-zero andN _ = zero
-suc(_) andN m = m
+zero   andN _ = zero
+suc(_) andN m = ℕto𝔹 m
 
 _orN_ : ℕ → ℕ → ℕ
-_orN_ zero    n = n
-_orN_ (suc n) _ = (suc n)
+_orN_ zero    n = ℕto𝔹 n
+_orN_ (suc n) _ = ℕto𝔹 (suc n)
 
 infixr 6 _andN_
 infixr 5 _orN_
 
 -- THIS IS THE STACK MACHINE, TRY NOT TO CHANGE IT.
 ⟨⟨_⟩⟩_,_,_ : program → stack → state → ℕ → Maybe stack 
-⟨⟨ [] ⟩⟩ s , _ , _                         = just s
-⟨⟨ _ ⟩⟩ s , _ , zero                       = just s
-⟨⟨ Val x ∷ p ⟩⟩ s , σ , suc k              = ⟨⟨ p ⟩⟩ (x ∷ s) , σ , k 
+⟨⟨ [] ⟩⟩ s , _ , _                       = just s
+⟨⟨ _ ⟩⟩ s , _ , zero                     = just s
+⟨⟨ Val x ∷ p ⟩⟩ s , σ , suc k            = ⟨⟨ p ⟩⟩ (x ∷ s) , σ , k 
 ⟨⟨ Var x ∷ p ⟩⟩ s , σ , suc k with σ x
 ...                            | just v  = ⟨⟨ p ⟩⟩ (v ∷ s) , σ , k
 ...                            | nothing = nothing
-⟨⟨ Add ∷ p ⟩⟩ (m ∷ n ∷ s) , σ , suc k      = ⟨⟨ p ⟩⟩ (m + n ∷ s) , σ , k
-⟨⟨ Sub ∷ p ⟩⟩ (m ∷ n ∷ s) , σ , suc k      = ⟨⟨ p ⟩⟩ (m ∸ n ∷ s) , σ , k
-⟨⟨ Not ∷ p ⟩⟩ (b ∷ s)     , σ , suc k      = ⟨⟨ p ⟩⟩ (notN b ∷ s) , σ , k
-⟨⟨ And ∷ p ⟩⟩ (m ∷ n ∷ s) , σ , suc k      = ⟨⟨ p ⟩⟩ (m andN n ∷ s) , σ , k 
-⟨⟨ Or  ∷ p ⟩⟩ (m ∷ n ∷ s) , σ , suc k      = ⟨⟨ p ⟩⟩ ((m orN n) ∷ s) , σ , k 
-⟨⟨ Joz n ∷ p ⟩⟩ (zero  ∷ s) , σ , suc k    = ⟨⟨ drop n p ⟩⟩ s , σ , k
-⟨⟨ Joz _ ∷ p ⟩⟩ (suc _ ∷ s) , σ , suc k    = ⟨⟨ p ⟩⟩ s , σ , k
+⟨⟨ Add ∷ p ⟩⟩ (m ∷ n ∷ s) , σ , suc k    = ⟨⟨ p ⟩⟩ (m + n ∷ s) , σ , k
+⟨⟨ Sub ∷ p ⟩⟩ (m ∷ n ∷ s) , σ , suc k    = ⟨⟨ p ⟩⟩ (m ∸ n ∷ s) , σ , k
+⟨⟨ Not ∷ p ⟩⟩ (b ∷ s)     , σ , suc k    = ⟨⟨ p ⟩⟩ (notN b ∷ s) , σ , k
+⟨⟨ And ∷ p ⟩⟩ (m ∷ n ∷ s) , σ , suc k    = ⟨⟨ p ⟩⟩ (m andN n ∷ s) , σ , k 
+⟨⟨ Or  ∷ p ⟩⟩ (m ∷ n ∷ s) , σ , suc k    = ⟨⟨ p ⟩⟩ ((m orN n) ∷ s) , σ , k 
+⟨⟨ Joz n ∷ p ⟩⟩ (zero  ∷ s) , σ , suc k  = ⟨⟨ drop n p ⟩⟩ s , σ , k
+⟨⟨ Joz _ ∷ p ⟩⟩ (suc _ ∷ s) , σ , suc k  = ⟨⟨ p ⟩⟩ s , σ , k
 
 -- FLOOP takes the next n instructions and repeats them M times, where M = top of stack.
 --  Drops them if stack top is zero.
@@ -89,8 +93,9 @@ compile (E ∥ E') = compile E ++ compile E' ++ [ Or ]
 -- These use substraction to find which one is larger. 
 -- The goal is to get a number greater than zero in the substraction.
 -- If the number is indeed greater than zero, then the condition is true.
-compile (E <= E') = compile E  ++ [ Val (suc zero) ] ++ compile E' ++ [ Add ] ++ [ Sub ]
-compile (E >= E') = compile E' ++ [ Val (suc zero) ] ++ compile E ++ [ Add ] ++ [ Sub ]
+-- (And 1) instruction added at the end to convert the value to Booleans.
+compile (E <= E') = compile E  ++ [ Val (suc zero) ] ++ compile E' ++ [ Add ] ++ [ Sub ] ++ [ Val (suc zero) ] ++ [ And ]
+compile (E >= E') = compile E' ++ [ Val (suc zero) ] ++ compile E ++ [ Add ] ++ [ Sub ] ++ [ Val (suc zero) ] ++ [ And ]
 compile (E == E') = sub1 ++ sub2 ++ [ And ]
     where
       e1 = compile E

@@ -25,7 +25,7 @@ data instr : Set where
   Sub  : instr
   And  : instr
   Joz  : ℕ → instr
-  FLoop : ℕ → instr
+  FLoop : (ℕ → 𝔹) → (ℕ → ℕ) → ℕ → instr
   Err  : instr
 
 -- DEFINITIONS FOR THE STACK MACHINE.
@@ -50,6 +50,11 @@ _orN_ : ℕ → ℕ → ℕ
 _orN_ zero    n = ℕto𝔹 n
 _orN_ (suc n) _ = ℕto𝔹 (suc n)
 
+_<'_ : ℕ → ℕ → 𝔹
+_ <' zero = false
+zero <' suc _ = true
+suc a <' suc b = a <' b
+
 infixr 6 _andN_
 infixr 5 _orN_
 
@@ -72,8 +77,9 @@ infixr 5 _orN_
 -- FLOOP takes the next n instructions and repeats them M times, where M = top of stack.
 --  Drops them if stack top is zero.
 --  Repeats them if stack top M is not zero. Then adds M-1 to top of stack.
-⟨⟨ FLoop n ∷ p ⟩⟩ (zero  ∷ s) , σ , suc k   = ⟨⟨ drop n p ⟩⟩ s , σ , k
-⟨⟨ FLoop n ∷ p ⟩⟩ (suc m ∷ s) , σ , suc k   = ⟨⟨ (take n p) ++ [ Val m ] ++ FLoop n ∷ p ⟩⟩ s , σ , k
+⟨⟨ FLoop c f n ∷ p ⟩⟩ (v ∷ s) , σ , suc k with c v
+⟨⟨ FLoop c f n ∷ p ⟩⟩ v ∷ s , σ , suc k | true  = ⟨⟨ (take n p) ++ [ Val (f v) ] ++ FLoop c f n ∷ p ⟩⟩ s , σ , k
+⟨⟨ FLoop c f n ∷ p ⟩⟩ v ∷ s , σ , suc k | false = ⟨⟨ drop n p ⟩⟩ s , σ , k 
 
 ⟨⟨ _ ⟩⟩ _ , _ , _ = nothing 
 
@@ -117,10 +123,10 @@ compile (if E then E' else  E'') = e ++ [ Joz (length p') ] ++ p' ++ e ++ [ Not 
 --  Loop to check on value of E.
 --    if E is non-zero. Do E'.
 --    if E is zero. Skip E'.
-compile (for E do E') = e ++ [ FLoop (length p) ] ++ p
-    where
-      e  = compile E
-      p  = compile E'
+-- compile (for E do E') = e ++ [ FLoop (length p) ] ++ p
+--     where
+--       e  = compile E
+--       p  = compile E'
 
 -- MULTIPLICATION:
 --  compile E;
@@ -137,9 +143,11 @@ compile (E ×× E') = e1 ++ [ Joz (length p') ] ++ p' ++
       e1 = [ Val (suc zero) ] ++ compile E ++ [ Sub ]
       e2 = compile E'
       p  = e2 ++ [ Add ]
-      p' = e2 ++ e1 ++ [ FLoop (length p) ] ++ p
+      c  = λ n → (0 <' n)
+      f  = λ n → n ∸ 1
+      p' = e2 ++ e1 ++ [ FLoop c f (length p) ] ++ p
 
---compile E = [ Err ]
+compile E = [ Err ]
 
 {-
 Example

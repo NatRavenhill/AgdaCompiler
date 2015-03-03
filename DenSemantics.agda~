@@ -67,14 +67,14 @@ open import CompExp
 ...  | just (suc _) = ⟦ E′ ⟧ σ
 ...  | nothing      = nothing
 
-⟦ for E do E' ⟧ σ = {!!} -- TODO
+--⟦ for E do E' ⟧ σ = {!!} -- TODO
 
 ⟦ E ×× E' ⟧ σ = ⟦ E ⟧ σ ××' ⟦ E' ⟧ σ where
   _××'_ : Maybe ℕ → Maybe ℕ → Maybe ℕ
   just m ××' just n = just (m * n)
   _      ××' _      = nothing
 
---⟦ _ ⟧ _ = nothing
+⟦ _ ⟧ _ = nothing
 
 e0 : Exp ℕ
 e0 =  N(1) ⊕ N(1) ⊕ V("x")
