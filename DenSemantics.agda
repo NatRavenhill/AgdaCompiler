@@ -10,7 +10,7 @@ open import Data.List
 open import Data.Product
 open import Relation.Binary.PropositionalEquality renaming ([_] to ⟪_⟫)
 open import Data.Maybe
-open import Data.String renaming (_++_ to _^_)
+open import Data.String renaming (_++_ to _^_; _==_ to _≡≡_)
 
 -- module imports for the Expressions.
 open import AbstractSyntax
@@ -67,6 +67,13 @@ open import CompExp
 ...  | just (suc _) = ⟦ E′ ⟧ σ
 ...  | nothing      = nothing
 
+--⟦ for E do E' ⟧ σ = {!!} -- TODO
+
+⟦ E ×× E' ⟧ σ = ⟦ E ⟧ σ ××' ⟦ E' ⟧ σ where
+  _××'_ : Maybe ℕ → Maybe ℕ → Maybe ℕ
+  just m ××' just n = just (m * n)
+  _      ××' _      = nothing
+
 ⟦ _ ⟧ _ = nothing
 
 e0 : Exp ℕ
@@ -90,5 +97,16 @@ subt = ⟨⟨ compile ((N 28) ⊝ (N 6)) ⟩⟩ [] , (λ x -> just 0) , 999
 timest : Maybe stack
 timest = ⟨⟨ compile ((N 28) ×× (N 62)) ⟩⟩ [] , (λ x -> just 0) , 999
 
+gtet : Maybe stack
+gtet = ⟨⟨ compile ((N 62) >= (N 62)) ⟩⟩ [] , (λ x -> just 0) , 999
+
+ltet : Maybe stack
+ltet = ⟨⟨ compile ((N 63) <= (N 62)) ⟩⟩ [] , (λ x -> just 0) , 999
+
+eqt1 : Maybe stack
+eqt1 = ⟨⟨ compile ((N 212321) == (N 22)) ⟩⟩ [] , (λ x -> just 0) , 999
+
+eqt2 : Maybe stack
+eqt2 = ⟨⟨ compile ((N 1234) == (N 1234)) ⟩⟩ [] , (λ x -> just 0) , 999
 -- TO TEST: (YU-YANG)
 -- gte, lte, eq, for.
