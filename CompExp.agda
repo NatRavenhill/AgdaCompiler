@@ -55,6 +55,11 @@ _ <' zero = false
 zero <' suc _ = true
 suc a <' suc b = a <' b
 
+_<=''_ : ℕ → ℕ → 𝔹
+zero <='' _ = true
+suc _ <='' zero = false
+suc a <='' suc b = a <='' b
+
 infixr 6 _andN_
 infixr 5 _orN_
 
@@ -79,7 +84,7 @@ infixr 5 _orN_
 --  Repeats them if stack top M is not zero. Then adds M-1 to top of stack.
 ⟨⟨ FLoop c f n ∷ p ⟩⟩ (v ∷ s) , σ , suc k with c (v ∷ s)
 ⟨⟨ FLoop c f n ∷ p ⟩⟩ v ∷ s , σ , suc k | true  = ⟨⟨ (take n p) ++ [ Val (f  v) ] ++ FLoop c f n ∷ p ⟩⟩ s , σ , k
-⟨⟨ FLoop c f n ∷ p ⟩⟩ v ∷ s , σ , suc k | false = ⟨⟨ drop n p ⟩⟩ s , σ , k 
+⟨⟨ FLoop c f n ∷ p ⟩⟩ v ∷ s , σ , suc k | false = ⟨⟨ drop n p ⟩⟩ (v ∷ s) , σ , k 
 
 ⟨⟨ _ ⟩⟩ _ , _ , _ = nothing 
 
@@ -138,7 +143,7 @@ compile (if E then E' else  E'') = e ++ [ Joz (length p') ] ++ p' ++ e ++ [ Not 
 --  IF e1 == ZERO, then insert a ZERO in stack.
 --  IF e1 != ZERO, then skip.
 compile (E ×× E') = e1 ++ [ Joz (length p') ] ++ p' ++ 
-                    e1 ++ [ Not ] ++ [ Joz 1 ] ++ [ Val zero ]
+                    e1 ++ [ Not ] ++ [ Joz 1 ] ++ [ Val zero ] ++ [ Joz 0 ]
     where
       e1 = [ Val (suc zero) ] ++ compile E ++ [ Sub ]
       e2 = compile E'
@@ -149,17 +154,27 @@ compile (E ×× E') = e1 ++ [ Joz (length p') ] ++ p' ++
       f  = λ n → n ∸ 1
       p' = e2 ++ e1 ++ [ FLoop c f (length p) ] ++ p
 
--- For now assume good params
---compile (E // E') = {!!}
---    where
---      e1 = compile E
---      e2 = compile E'
---      p = e2 ++ [ Sub ]
---      c : List ℕ → 𝔹
---      c (j ∷ a ∷ b ∷ s) = (j * b) <' a
---      c _                    = false
---      f = λ n → n + 1
---      p' = [ Val zero ] ++ e1 ++ [ FLoop c f (length p) ] ++ p
+-- DIVISION
+-- First check if E' is zero, then Err
+-- Then check if E' > E then zero
+-- Then loop from j = 0 until (j * b) <= a
+-- The return (j - 1)
+compile (E // E') = e2zero ++ [ Not ] ++ [ Joz (length div) ] ++ div ++ e2zero ++ [ Joz 1 ] ++ [ Err ] -- If e2 != zero then div else error
+    where
+      e1 = compile E
+      e2 = compile E'
+      e1less = e1 ++ e2 ++ [ Sub ] ++ [ Val (suc zero) ] ++ [ And ] -- e1 < e2
+      c : List ℕ → 𝔹 -- Condition check
+      c (j ∷ one ∷ a ∷ b ∷ s) = (j * b) <='' a
+      c _                    = false
+      f = λ n → n + 1 -- Increment
+      p = e2 ++ e1 ++ [ Val 1 ] ++ [ Val 0 ] ++ [ FLoop c f 0 ] ++ [ Sub ] -- The loop
+      div = e1less ++ [ Not ] ++ [ Joz (length p) ] ++ p ++ e1less ++ [ Joz 1 ] ++ [ Val zero ] -- If e1 < e2 then zero else div
+      sub1 = e2 ++ [ Val zero ] ++ [ Val (suc zero) ] ++ [ Add ] ++ [ Sub ] -- Used for ==, to work out if e2 is zero
+      sub2 = [ Val zero ] ++ e2 ++ [ Val (suc zero) ] ++ [ Add ] ++ [ Sub ]
+      e2zero = sub1 ++ sub2 ++ [ And ] -- e2 == zero
+
+
 
 compile E = [ Err ]
 

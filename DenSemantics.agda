@@ -97,6 +97,22 @@ subt = ⟨⟨ compile ((N 28) ⊝ (N 6)) ⟩⟩ [] , (λ x -> just 0) , 999
 timest : Maybe stack
 timest = ⟨⟨ compile ((N 28) ×× (N 123)) ⟩⟩ [] , (λ x -> just 0) , 999
 
+-- 12/0 = nothing
+divt1 : Maybe stack
+divt1 = ⟨⟨ compile ((N 12) // (N 0)) ⟩⟩ [] , (λ x -> just 0) , 999
+
+-- 12/3 = 4
+divt2 : Maybe stack
+divt2 = ⟨⟨ compile ((N 12) // (N 3)) ⟩⟩ [] , (λ x -> just 0) , 999
+
+-- 12/7 = 1
+divt3 : Maybe stack
+divt3 = ⟨⟨ compile ((N 12) // (N 7)) ⟩⟩ [] , (λ x -> just 0) , 999
+
+-- 12/13 = 0
+divt4 : Maybe stack
+divt4 = ⟨⟨ compile ((N 12) // (N 13)) ⟩⟩ [] , (λ x -> just 0) , 999
+
 gtet : Maybe stack
 gtet = ⟨⟨ compile ((N 62) >= (N 62)) ⟩⟩ [] , (λ x -> just 0) , 999
 
