@@ -18,7 +18,7 @@ data Exp : (A : Set) → Set where
   N   : ℕ → Exp ℕ
   V   : String → Exp ℕ 
 
--- arithmetic operators
+-- arithmetic operators - addition and subtraction
   _⊕_ : Exp ℕ → Exp ℕ → Exp ℕ
   _⊝_ : Exp ℕ → Exp ℕ → Exp ℕ 
 
@@ -33,19 +33,21 @@ data Exp : (A : Set) → Set where
 -- 3. if then else, short-cut logical operators
   if_then_else : Exp ℕ → Exp ℕ → Exp ℕ → Exp ℕ -- added by Matthew
 
--- 4. times, divide (short-cut?) ... we have no loops though! how would you extend the machine?
-  _××_    : Exp ℕ → Exp ℕ → Exp ℕ
-  _//_       : Exp ℕ → Exp ℕ → Exp ℕ
+-- more arithmetic operators - multiplication and division
+  _⊗_    : Exp ℕ → Exp ℕ → Exp ℕ
+  _⊘_    : Exp ℕ → Exp ℕ → Exp ℕ
 
 --  while_do_ : Exp 𝔹 → Exp ℕ → Exp ℕ --not sure if we will need this.
   for_do_ : Exp ℕ → Exp ℕ → Exp ℕ
 --           simple extension : more operations (boring)
 --           complex extension : more control
 -- maybe define while-loop
-infixr 5 _⊕_
-infixr 5 _⊝_
-infixr 6 _&_
-infixr 5 _∥_
-infixr 4 _<=_
-infixr 4 _>=_
-infixr 4 _==_
+infixl  6 _⊕_
+infixl  6 _⊝_
+infixl  7 _⊗_
+infixl  7 _⊘_
+infixl  6 _&_
+infixl  5 _∥_
+infixl  4 _<=_
+infixl  4 _>=_
+infixl  4 _==_

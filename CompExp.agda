@@ -79,9 +79,12 @@ infixr 5 _orN_
 ⟨⟨ Joz n ∷ p ⟩⟩ (zero  ∷ s) , σ , suc k  = ⟨⟨ drop n p ⟩⟩ s , σ , k
 ⟨⟨ Joz _ ∷ p ⟩⟩ (suc _ ∷ s) , σ , suc k  = ⟨⟨ p ⟩⟩ s , σ , k
 
--- FLOOP takes the next n instructions and repeats them M times, where M = top of stack.
---  Drops them if stack top is zero.
---  Repeats them if stack top M is not zero. Then adds M-1 to top of stack.
+-- FLOOP c f n r takes the next n instructions and repeats them while (c  (v ∷ s)) is true, changing v according to f.
+-- If (c  (v ∷ s)) is false, it drops the next n instructions (doesn't do them), and cleans the stack according to r.
+-- c : (List ℕ → 𝔹) = condition on which to repeat
+-- f : (ℕ → ℕ)      = how to change the counter v
+-- n : ℕ            = number of instructions to repeat
+-- List ℕ → List ℕ  = function to clean the stack after the FLoop
 ⟨⟨ FLoop c f n r ∷ p ⟩⟩ (v ∷ s) , σ , suc k with c (v ∷ s)
 ⟨⟨ FLoop c f n r ∷ p ⟩⟩ v ∷ s , σ , suc k | true  = ⟨⟨ (take n p) ++ [ Val (f  v) ] ++ FLoop c f n r ∷ p ⟩⟩ s , σ , k
 ⟨⟨ FLoop c f n r ∷ p ⟩⟩ v ∷ s , σ , suc k | false = ⟨⟨ drop n p ⟩⟩ (r (v ∷ s)) , σ , k 
@@ -106,7 +109,7 @@ compile (E ∥ E') = compile E ++ compile E' ++ [ Or ]
 -- If the number is indeed greater than zero, then the condition is true.
 -- (And 1) instruction added at the end to convert the value to Booleans.
 compile (E <= E') = compile E  ++ [ Val (suc zero) ] ++ compile E' ++ [ Add ] ++ [ Sub ] ++ [ Val (suc zero) ] ++ [ And ]
-compile (E >= E') = compile E' ++ [ Val (suc zero) ] ++ compile E ++ [ Add ] ++ [ Sub ] ++ [ Val (suc zero) ] ++ [ And ]
+compile (E >= E') = compile E' ++ [ Val (suc zero) ] ++ compile E  ++ [ Add ] ++ [ Sub ] ++ [ Val (suc zero) ] ++ [ And ]
 compile (E == E') = sub1 ++ sub2 ++ [ And ]
     where
       e1 = compile E
@@ -142,7 +145,7 @@ compile (if E then E' else  E'') = e ++ [ Joz (length p') ] ++ p' ++ e ++ [ Not 
 --  NOT e1.
 --  IF e1 == ZERO, then insert a ZERO in stack.
 --  IF e1 != ZERO, then skip.
-compile (E ×× E') = e1 ++ [ Joz (length p') ] ++ p' ++ 
+compile (E ⊗ E') = e1 ++ [ Joz (length p') ] ++ p' ++ 
                     e1 ++ [ Not ] ++ [ Joz 1 ] ++ [ Val zero ]
     where
       e1 = [ Val (suc zero) ] ++ compile E ++ [ Sub ]
@@ -152,8 +155,8 @@ compile (E ×× E') = e1 ++ [ Joz (length p') ] ++ p' ++
       c (x ∷ _) = 0 <' x
       c _         = false
       f  = λ n → n ∸ 1
-      r : List ℕ -> List ℕ
-      r (i ∷ ans ∷ s) = (ans ∷ s)
+      r : List ℕ -> List ℕ        -- function to clean the stack after the for loop.
+      r (i ∷ ans ∷ s) = (ans ∷ s)  -- this removes the counter used by the for-loop.
       r _ = []
       p' = e2 ++ e1 ++ [ FLoop c f (length p) r ] ++ p
 
@@ -162,7 +165,8 @@ compile (E ×× E') = e1 ++ [ Joz (length p') ] ++ p' ++
 -- Then check if E' > E then zero
 -- Then loop from j = 0 until (j * b) <= a
 -- The return (j - 1)
-compile (E // E') = e2zero ++ [ Not ] ++ [ Joz (length div) ] ++ div ++ e2zero ++ [ Joz 1 ] ++ [ Err ] -- If e2 != zero then div else error
+compile (E ⊘ E') = e2zero ++ [ Not   ] ++ [ Joz (length div) ] ++ div ++ 
+                    e2zero ++ [ Joz 1 ] ++ [ Err ] -- If e2 != zero then div else error
     where
       e1 = compile E
       e2 = compile E'
@@ -180,11 +184,7 @@ compile (E // E') = e2zero ++ [ Not ] ++ [ Joz (length div) ] ++ div ++ e2zero +
       sub2 = [ Val zero ] ++ e2 ++ [ Val (suc zero) ] ++ [ Add ] ++ [ Sub ]
       e2zero = sub1 ++ sub2 ++ [ And ] -- e2 == zero
 
-
-
 compile E = [ Err ]
-
-
 
 {-
 Example

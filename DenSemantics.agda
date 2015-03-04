@@ -69,10 +69,10 @@ open import CompExp
 
 --⟦ for E do E' ⟧ σ = {!!} -- TODO
 
-⟦ E ×× E' ⟧ σ = ⟦ E ⟧ σ ××' ⟦ E' ⟧ σ where
-  _××'_ : Maybe ℕ → Maybe ℕ → Maybe ℕ
-  just m ××' just n = just (m * n)
-  _      ××' _      = nothing
+⟦ E ⊗ E' ⟧ σ = ⟦ E ⟧ σ ⊗' ⟦ E' ⟧ σ where
+  _⊗'_ : Maybe ℕ → Maybe ℕ → Maybe ℕ
+  just m ⊗' just n = just (m * n)
+  _      ⊗' _      = nothing
 
 ⟦ _ ⟧ _ = nothing
 
@@ -95,23 +95,23 @@ subt : Maybe stack
 subt = ⟨⟨ compile ((N 28) ⊝ (N 6)) ⟩⟩ [] , (λ x -> just 0) , 999
 
 timest : Maybe stack
-timest = ⟨⟨ compile ((N 28) ×× (N 123)) ⟩⟩ [] , (λ x -> just 0) , 999
+timest = ⟨⟨ compile ((N 28) ⊗ (N 123)) ⟩⟩ [] , (λ x -> just 0) , 999
 
 -- 12/0 = nothing
 divt1 : Maybe stack
-divt1 = ⟨⟨ compile ((N 12) // (N 0)) ⟩⟩ [] , (λ x -> just 0) , 999
+divt1 = ⟨⟨ compile ((N 12) ⊘ (N 0)) ⟩⟩ [] , (λ x -> just 0) , 999
 
 -- 12/3 = 4
 divt2 : Maybe stack
-divt2 = ⟨⟨ compile ((N 12) // (N 3)) ⟩⟩ [] , (λ x -> just 0) , 999
+divt2 = ⟨⟨ compile ((N 12) ⊘ (N 3)) ⟩⟩ [] , (λ x -> just 0) , 999
 
 -- 12/7 = 1
 divt3 : Maybe stack
-divt3 = ⟨⟨ compile ((N 12) // (N 7)) ⟩⟩ [] , (λ x -> just 0) , 999
+divt3 = ⟨⟨ compile ((N 12) ⊘ (N 7)) ⟩⟩ [] , (λ x -> just 0) , 999
 
 -- 12/13 = 0
 divt4 : Maybe stack
-divt4 = ⟨⟨ compile ((N 12) // (N 13)) ⟩⟩ [] , (λ x -> just 0) , 999
+divt4 = ⟨⟨ compile ((N 12) ⊘ (N 13)) ⟩⟩ [] , (λ x -> just 0) , 999
 
 gtet : Maybe stack
 gtet = ⟨⟨ compile ((N 62) >= (N 62)) ⟩⟩ [] , (λ x -> just 0) , 999
@@ -124,5 +124,16 @@ eqt1 = ⟨⟨ compile ((N 212321) == (N 22)) ⟩⟩ [] , (λ x -> just 0) , 999
  
 eqt2 : Maybe stack
 eqt2 = ⟨⟨ compile ((N 1234) == (N 1234)) ⟩⟩ [] , (λ x -> just 0) , 999
--- TO TEST: (YU-YANG)
--- gte, lte, eq, for.
+
+-- 28 * 123 - 6 = 3438
+aritht1 : Maybe stack
+aritht1 = ⟨⟨ compile ((N 28) ⊗ (N 123) ⊝ (N 6)) ⟩⟩ [] , (λ x -> just 0) , 999
+
+-- 999 + 321 * 123 = 40482
+aritht2 : Maybe stack
+aritht2 = ⟨⟨ compile ((N 999) ⊕ (N 321) ⊗ (N 123)) ⟩⟩ [] , (λ x -> just 0) , 10000
+
+-- 999 / 21 + 321 * 123 / 48 = 869
+aritht3 : Maybe stack
+aritht3 = ⟨⟨ compile ((N 999) ⊘ (N 21) ⊕ (N 321) ⊗ (N 123) ⊘ (N 48)) ⟩⟩ [] , (λ x -> just 0) , 100000
+

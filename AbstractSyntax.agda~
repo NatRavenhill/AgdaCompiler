@@ -34,7 +34,11 @@ data Exp : (A : Set) → Set where
   if_then_else : Exp ℕ → Exp ℕ → Exp ℕ → Exp ℕ -- added by Matthew
 
 -- 4. times, divide (short-cut?) ... we have no loops though! how would you extend the machine?
-  while_do_ : Exp 𝔹 → Exp ℕ → Exp ℕ
+  _××_    : Exp ℕ → Exp ℕ → Exp ℕ
+  _//_       : Exp ℕ → Exp ℕ → Exp ℕ
+
+--  while_do_ : Exp 𝔹 → Exp ℕ → Exp ℕ --not sure if we will need this.
+  for_do_ : Exp ℕ → Exp ℕ → Exp ℕ
 --           simple extension : more operations (boring)
 --           complex extension : more control
 -- maybe define while-loop
