@@ -25,7 +25,7 @@ data instr : Set where
   Sub  : instr
   And  : instr
   Joz  : ℕ → instr
-  FLoop : (List ℕ → 𝔹) → (ℕ → ℕ) → ℕ → instr
+  FLoop : (List ℕ → 𝔹) → (ℕ → ℕ) → ℕ → (List ℕ → List ℕ) → instr
   Err  : instr
 
 -- DEFINITIONS FOR THE STACK MACHINE.
@@ -82,9 +82,9 @@ infixr 5 _orN_
 -- FLOOP takes the next n instructions and repeats them M times, where M = top of stack.
 --  Drops them if stack top is zero.
 --  Repeats them if stack top M is not zero. Then adds M-1 to top of stack.
-⟨⟨ FLoop c f n ∷ p ⟩⟩ (v ∷ s) , σ , suc k with c (v ∷ s)
-⟨⟨ FLoop c f n ∷ p ⟩⟩ v ∷ s , σ , suc k | true  = ⟨⟨ (take n p) ++ [ Val (f  v) ] ++ FLoop c f n ∷ p ⟩⟩ s , σ , k
-⟨⟨ FLoop c f n ∷ p ⟩⟩ v ∷ s , σ , suc k | false = ⟨⟨ drop n p ⟩⟩ (v ∷ s) , σ , k 
+⟨⟨ FLoop c f n r ∷ p ⟩⟩ (v ∷ s) , σ , suc k with c (v ∷ s)
+⟨⟨ FLoop c f n r ∷ p ⟩⟩ v ∷ s , σ , suc k | true  = ⟨⟨ (take n p) ++ [ Val (f  v) ] ++ FLoop c f n r ∷ p ⟩⟩ s , σ , k
+⟨⟨ FLoop c f n r ∷ p ⟩⟩ v ∷ s , σ , suc k | false = ⟨⟨ drop n p ⟩⟩ (r (v ∷ s)) , σ , k 
 
 ⟨⟨ _ ⟩⟩ _ , _ , _ = nothing 
 
@@ -143,7 +143,7 @@ compile (if E then E' else  E'') = e ++ [ Joz (length p') ] ++ p' ++ e ++ [ Not 
 --  IF e1 == ZERO, then insert a ZERO in stack.
 --  IF e1 != ZERO, then skip.
 compile (E ×× E') = e1 ++ [ Joz (length p') ] ++ p' ++ 
-                    e1 ++ [ Not ] ++ [ Joz 1 ] ++ [ Val zero ] ++ [ Joz 0 ]
+                    e1 ++ [ Not ] ++ [ Joz 1 ] ++ [ Val zero ]
     where
       e1 = [ Val (suc zero) ] ++ compile E ++ [ Sub ]
       e2 = compile E'
@@ -152,7 +152,10 @@ compile (E ×× E') = e1 ++ [ Joz (length p') ] ++ p' ++
       c (x ∷ _) = 0 <' x
       c _         = false
       f  = λ n → n ∸ 1
-      p' = e2 ++ e1 ++ [ FLoop c f (length p) ] ++ p
+      r : List ℕ -> List ℕ
+      r (i ∷ ans ∷ s) = (ans ∷ s)
+      r _ = []
+      p' = e2 ++ e1 ++ [ FLoop c f (length p) r ] ++ p
 
 -- DIVISION
 -- First check if E' is zero, then Err
@@ -165,10 +168,13 @@ compile (E // E') = e2zero ++ [ Not ] ++ [ Joz (length div) ] ++ div ++ e2zero +
       e2 = compile E'
       e1less = e1 ++ e2 ++ [ Sub ] ++ [ Val (suc zero) ] ++ [ And ] -- e1 < e2
       c : List ℕ → 𝔹 -- Condition check
-      c (j ∷ one ∷ a ∷ b ∷ s) = (j * b) <='' a
+      c (j ∷ a ∷ b ∷ s) = (j * b) <='' a
       c _                    = false
       f = λ n → n + 1 -- Increment
-      p = e2 ++ e1 ++ [ Val 1 ] ++ [ Val 0 ] ++ [ FLoop c f 0 ] ++ [ Sub ] -- The loop
+      r : List ℕ -> List ℕ
+      r (j ∷ a ∷ b ∷ s) = ((j ∸ 1) ∷ s)
+      r _ = []
+      p = e2 ++ e1 ++ [ Val 0 ] ++ [ FLoop c f 0 r ] -- The loop
       div = e1less ++ [ Not ] ++ [ Joz (length p) ] ++ p ++ e1less ++ [ Joz 1 ] ++ [ Val zero ] -- If e1 < e2 then zero else div
       sub1 = e2 ++ [ Val zero ] ++ [ Val (suc zero) ] ++ [ Add ] ++ [ Sub ] -- Used for ==, to work out if e2 is zero
       sub2 = [ Val zero ] ++ e2 ++ [ Val (suc zero) ] ++ [ Add ] ++ [ Sub ]
