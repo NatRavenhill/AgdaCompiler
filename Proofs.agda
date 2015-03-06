@@ -17,6 +17,17 @@ open import AbstractSyntax
 open import DenSemantics
 open import CompExp
 
+----------------------------------------
+---SYNTAX FOR EQUATIONAL REASONING---
+-----------------------------------------
+_≡[_]_ : ∀ {A : Set} (x : A) {y z : A} → x ≡ y → y ≡ z → x ≡ z
+x ≡[ refl ] refl = refl
+infixr 2 _≡[_]_
+
+_done : ∀ {A : Set} (x : A) → x ≡ x
+x done = refl
+infix 2 _done
+
 -------------------------
 -- PROOF FOR SOUNDNESS --
 -------------------------
@@ -24,35 +35,48 @@ open import CompExp
 sound : (T : Set) (e : Exp T) (p : program) (n : ℕ)(σ : state) (k : ℕ) →
         ⟨⟨ compile e ⟩⟩ [] , σ , k ≡ just [ n ] → ⟦ e ⟧ σ ≡ just n 
 
---Booleans (Natalie)
-sound .𝔹 (B x) p n σ zero () --can't have just [] ≡ just [ n ] so false
-sound .𝔹 (B x) p n σ (suc k) () --can't have  nothing ≡ just [ n ]  so false  
+--soundness for booleans, proved by pattern matching (Natalie)
+sound .𝔹 (B true) p n σ zero ()
+sound .𝔹 (B false) p n σ zero ()
+sound .𝔹 (B true) p .1 σ (suc k) refl = refl
+sound .𝔹 (B false) p .0 σ (suc k) refl = refl
 
---Constants (Natalie)
-sound .ℕ (N x) p n σ zero ()  --can't have just [] ≡ just n so false
-sound .ℕ (N zero) p zero σ (suc k) pf = refl
-sound .ℕ (N zero) p (suc n) σ (suc k) ()
+--soundness for booleans, proved by pattern matching (Natalie)
+sound .ℕ (N zero) p n σ zero ()
+sound .ℕ (N zero) p .0 σ (suc k) refl = refl
+sound .ℕ (N (suc x)) p n σ zero ()
 sound .ℕ (N (suc x)) p .(suc x) σ (suc k) refl = refl
 
---Variables (?)
-sound .ℕ (V x) p n σ k  with σ x
-sound .ℕ (V x) p n σ zero | just v  = {!!}
-sound .ℕ (V x) p n σ (suc k) | just v  = {!!}
-... | nothing  = {!!}
+--soundness for Variables (Natalie)
+sound .ℕ (V x) p n σ k q  with σ x
+sound .ℕ (V x) p n σ k q | just v = {!!} --v is equal to n, prove this! 
+sound .ℕ (V x) p n σ k q | nothing = {!!}  --this should be false. q is a false statement
 
- -- where 
-{-   lemma3 : ⟨⟨ [ Var x ] ⟩⟩ [] , σ , k ≡ just [ n ] → σ x ≡ just n
-   lemma3 = {!!}-}
+--soundness for addition (Natalie)
+sound .ℕ (e ⊕ e₁) p n σ zero q = {!!}
+sound .ℕ (e ⊕ e₁) p n σ (suc k) q = {!!}
 
---Addition (?)
---⟨⟨ (compile e ++ compile e₁) ++ [ Add ] ⟩⟩ [] , σ , k ≡ just [ n ] →  (e _.+' e₁) σ (⟦ e ⟧ σ) (⟦ e₁ ⟧ σ) ≡ just n
-sound .ℕ (e ⊕ e₁) p n σ k = {!!}
+sound .ℕ (e ⊝ e₁) p n σ k x = {!!}
 
---Conditionals (?)
--- ⟨⟨ [ Err ] ⟩⟩ [] , σ , k ≡ just [ n ] →  (⟦ if e then e₁ else e₂ ⟧ σ | ⟦ e ⟧ σ) ≡ just n
-sound .ℕ (if_then_else e e₁ e₂) p n σ k = {!!}
+sound .𝔹 (¬ e) p n σ k x = {!!}
 
-sound _ _ _ _ _ _ _ = {!!}
+sound .𝔹 (e & e₁) p n σ k x = {!!}
+
+sound .𝔹 (e ∥ e₁) p n σ k x = {!!}
+
+sound .𝔹 (e <= e₁) p n σ k x = {!!}
+
+sound .𝔹 (e >= e₁) p n σ k x = {!!}
+
+sound .𝔹 (e AbstractSyntax.== e₁) p n σ k x = {!!}
+
+sound .ℕ (if_then_else e e₁ e₂) p n σ k x = {!!}
+
+sound .ℕ (e ⊗ e₁) p n σ k x = {!!}
+
+sound .ℕ (e ⊘ e₁) p n σ k x = {!!}
+
+sound .ℕ (for e do e₁) p n σ k x = {!!}
   
 ------------------------
 -- PROOF FOR ADEQUACY --
