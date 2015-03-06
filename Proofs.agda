@@ -11,6 +11,7 @@ open import Data.Product
 open import Relation.Binary.PropositionalEquality renaming ([_] to ⟪_⟫)
 open import Data.Maybe
 open import Data.String renaming (_++_ to _^_)
+open import Data.Empty
 
 -- Stuff used for the proofs.
 open import AbstractSyntax
@@ -27,6 +28,17 @@ infixr 2 _≡[_]_
 _done : ∀ {A : Set} (x : A) → x ≡ x
 x done = refl
 infix 2 _done
+
+lemma2 : ∀ x σ k → (n m : ℕ) → σ x ≡ just m → ⟨⟨ Var x ∷ [] ⟩⟩ [] , σ , k ≡ just (n ∷ []) → m ≡ n
+lemma2 x σ zero n m p ()
+lemma2 x σ (suc k) n m p q = {!!} 
+  where
+--  v : Maybe ℕ
+--  v = ⟨⟨ Var x ∷ [] ⟩⟩ [] , σ , suc k | p
+lemma1 :  ∀ x σ k n → ⟨⟨ Var x ∷ [] ⟩⟩ [] , σ , k ≡ just (n ∷ []) → σ x ≡ just n
+lemma1 x σ k n with σ x | inspect σ x
+... | just m | ⟪ eq ⟫ = {!!}
+... | nothing | ⟪ eq ⟫ = {!!}
 
 -------------------------
 -- PROOF FOR SOUNDNESS --
@@ -51,15 +63,18 @@ sound .ℕ (N (suc x)) p .(suc x) σ (suc k) refl = refl
 --q proves that we can get n from compiling Var x
 --show we can get v from compiling Var x
 --then v must be equal to n
-sound .ℕ (V x) p n σ k q  with σ x
-sound .ℕ (V x) p n σ k q | just v = goal --v is equal to n, prove this! (Get just v from compile and get just n from [[V x]] σ) 
+sound .ℕ (V x) p n σ k q  with σ x | inspect σ x 
+sound .ℕ (V x) p n σ k q | just v | ⟪ eq ⟫ = {!eq!}
+{-goal --v is equal to n, prove this! (Get just v from compile and get just n from [[V x]] σ) 
    where
    goal : just v ≡ just n
-   goal = just v ≡[ {!!} ]  just n done
-   subgoal : ⟨⟨ Var x ∷ [] ⟩⟩ [] , σ , k ≡ just v
-   subgoal = ?
+   goal = lemma1 x σ k n {!!}
+-}
+-- just v ≡[ {!!} ]  just n done
+--   subgoal : ⟨⟨ Var x ∷ [] ⟩⟩ [] , σ , k ≡ just v
+ --  subgoal = ?
 
-sound .ℕ (V x) p n σ k q | nothing = {!!}  --this should be false. q is a false statement
+sound .ℕ (V x) p n σ k q | nothing | r = {!!}  --this should be false. q is a false statement
 
 --soundness for addition (Natalie)
 sound .ℕ (e ⊕ e₁) p n σ zero q = {!!}
