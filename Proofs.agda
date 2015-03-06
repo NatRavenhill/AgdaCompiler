@@ -41,15 +41,24 @@ sound .𝔹 (B false) p n σ zero ()
 sound .𝔹 (B true) p .1 σ (suc k) refl = refl
 sound .𝔹 (B false) p .0 σ (suc k) refl = refl
 
---soundness for booleans, proved by pattern matching (Natalie)
+--soundness for nats, proved by pattern matching (Natalie)
 sound .ℕ (N zero) p n σ zero ()
 sound .ℕ (N zero) p .0 σ (suc k) refl = refl
 sound .ℕ (N (suc x)) p n σ zero ()
 sound .ℕ (N (suc x)) p .(suc x) σ (suc k) refl = refl
 
 --soundness for Variables (Natalie)
+--q proves that we can get n from compiling Var x
+--show we can get v from compiling Var x
+--then v must be equal to n
 sound .ℕ (V x) p n σ k q  with σ x
-sound .ℕ (V x) p n σ k q | just v = {!!} --v is equal to n, prove this! 
+sound .ℕ (V x) p n σ k q | just v = goal --v is equal to n, prove this! (Get just v from compile and get just n from [[V x]] σ) 
+   where
+   goal : just v ≡ just n
+   goal = just v ≡[ {!!} ]  just n done
+   subgoal : ⟨⟨ Var x ∷ [] ⟩⟩ [] , σ , k ≡ just v
+   subgoal = ?
+
 sound .ℕ (V x) p n σ k q | nothing = {!!}  --this should be false. q is a false statement
 
 --soundness for addition (Natalie)
