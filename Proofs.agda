@@ -29,16 +29,45 @@ _done : ∀ {A : Set} (x : A) → x ≡ x
 x done = refl
 infix 2 _done
 
+--
+lem : {a b : List ℕ} → just a ≡ just b → a ≡ b
+lem p = cong f p
+    where
+      f : Maybe (List ℕ) → List ℕ 
+      f (just x) = x
+      f nothing = [] -- This case doesn't happen
+
+
+
+
+--
+lem5 : {A : Set} {a b : A} → a ≡ b → just a ≡ just b
+lem5 p = cong f p
+    where
+      f : {B : Set} → B → Maybe B
+      f x = just x
+
+--
+lem2 : {A : Set} {a b : A} → (a ∷ []) ≡ (b ∷ []) → a ≡ b
+lem2 refl = refl
+
+--
 lemma2 : ∀ x σ k → (n m : ℕ) → σ x ≡ just m → ⟨⟨ Var x ∷ [] ⟩⟩ [] , σ , k ≡ just (n ∷ []) → m ≡ n
 lemma2 x σ zero n m p ()
-lemma2 x σ (suc k) n m p q = {!!} 
-  where
---  v : Maybe ℕ
---  v = ⟨⟨ Var x ∷ [] ⟩⟩ [] , σ , suc k | p
-lemma1 :  ∀ x σ k n → ⟨⟨ Var x ∷ [] ⟩⟩ [] , σ , k ≡ just (n ∷ []) → σ x ≡ just n
-lemma1 x σ k n with σ x | inspect σ x
-... | just m | ⟪ eq ⟫ = {!!}
-... | nothing | ⟪ eq ⟫ = {!!}
+lemma2 x σ (suc k) n m p q rewrite p = lem2 (lem q) 
+
+--
+lemma1 :  ∀ x σ k n → ⟨⟨ Var x ∷ [] ⟩⟩ [] , σ , (suc k) ≡ just (n ∷ []) → σ x ≡ just n
+lemma1 x σ k n p with σ x | inspect σ x
+... | just m | ⟪ eq ⟫ = lem5 (lem2 (lem p))
+    where
+      f : {A : Set} → A → Maybe A
+      f a = just a
+lemma1 x σ k n () | nothing | ⟪ eq ⟫
+
+
+lem6 : {A : Set} {a b c : A} → a ≡ b → a ≡ c → b ≡ c
+lem6 refl refl = refl
 
 -------------------------
 -- PROOF FOR SOUNDNESS --
@@ -59,22 +88,16 @@ sound .ℕ (N zero) p .0 σ (suc k) refl = refl
 sound .ℕ (N (suc x)) p n σ zero ()
 sound .ℕ (N (suc x)) p .(suc x) σ (suc k) refl = refl
 
---soundness for Variables (Natalie)
+
+--soundness for Variables (Natalie & Mat & Yu)
 --q proves that we can get n from compiling Var x
 --show we can get v from compiling Var x
 --then v must be equal to n
 sound .ℕ (V x) p n σ k q  with σ x | inspect σ x 
-sound .ℕ (V x) p n σ k q | just v | ⟪ eq ⟫ = {!eq!}
-{-goal --v is equal to n, prove this! (Get just v from compile and get just n from [[V x]] σ) 
-   where
-   goal : just v ≡ just n
-   goal = lemma1 x σ k n {!!}
--}
--- just v ≡[ {!!} ]  just n done
---   subgoal : ⟨⟨ Var x ∷ [] ⟩⟩ [] , σ , k ≡ just v
- --  subgoal = ?
+sound .ℕ (V x) p n σ zero () | _ | ⟪ eq ⟫
+sound .ℕ (V x) p n σ (suc k) q | just v | ⟪ eq ⟫ = lem6 eq (lemma1 x σ k n q)
 
-sound .ℕ (V x) p n σ k q | nothing | r = {!!}  --this should be false. q is a false statement
+sound .ℕ (V x) p n σ (suc k) q | nothing | ⟪ eq ⟫ = {!!}  --this should be false. q is a false statement
 
 --soundness for addition (Natalie)
 sound .ℕ (e ⊕ e₁) p n σ zero q = {!!}
