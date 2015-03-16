@@ -30,47 +30,33 @@ x done = refl
 infix 2 _done
 
 --
-lem : {a b : List ℕ} → just a ≡ just b → a ≡ b
-lem p = cong f p
+cong-just-elim : {a b : List ℕ} → just a ≡ just b → a ≡ b
+cong-just-elim p = cong f p
     where
       f : Maybe (List ℕ) → List ℕ 
       f (just x) = x
       f nothing = [] -- This case doesn't happen
 
 --
-lem5 : {A : Set} {a b : A} → a ≡ b → just a ≡ just b
-lem5 p = cong f p
+cong-just-intro : {A : Set} {a b : A} → a ≡ b → just a ≡ just b
+cong-just-intro p = cong f p
     where
       f : {B : Set} → B → Maybe B
       f x = just x
 
 --
-lem2 : {A : Set} {a b : A} → (a ∷ []) ≡ (b ∷ []) → a ≡ b
-lem2 refl = refl
-
---
-lemma2 : ∀ x σ k → (n m : ℕ) → σ x ≡ just m → ⟨⟨ Var x ∷ [] ⟩⟩ [] , σ , k ≡ just (n ∷ []) → m ≡ n
-lemma2 x σ zero n m p ()
-lemma2 x σ (suc k) n m p q rewrite p = lem2 (lem q) 
-
---
-lemma1 :  ∀ x σ k n → ⟨⟨ Var x ∷ [] ⟩⟩ [] , σ , (suc k) ≡ just (n ∷ []) → σ x ≡ just n
-lemma1 x σ k n p with σ x | inspect σ x
-... | just m | ⟪ eq ⟫ = lem5 (lem2 (lem p))
-    where
-      f : {A : Set} → A → Maybe A
-      f a = just a
-lemma1 x σ k n () | nothing | ⟪ eq ⟫
+cong-list : {A : Set} {a b : A} → (a ∷ []) ≡ (b ∷ []) → a ≡ b
+cong-list refl = refl
 
 
-lem6 : {A : Set} {a b c : A} → a ≡ b → a ≡ c → b ≡ c
-lem6 refl refl = refl
+sym-trans : {A : Set} {a b c : A} → a ≡ b → a ≡ c → b ≡ c
+sym-trans refl refl = refl
 
 -------------------------
 -- PROOF FOR SOUNDNESS --
 -------------------------
 --anything that has not been defined in compile will just be Err 
-sound : (T : Set) (e : Exp T) (p : program) (n : ℕ)(σ : state) (k : ℕ) →
+sound : (T : Set) (e : Exp T) (p : program) (n : ℕ) (σ : state) (k : ℕ) →
         ⟨⟨ compile e ⟩⟩ [] , σ , k ≡ just [ n ] → ⟦ e ⟧ σ ≡ just n 
 
 --soundness for booleans, proved by pattern matching (Natalie)
@@ -90,13 +76,30 @@ sound .ℕ (N (suc x)) p .(suc x) σ (suc k) refl = refl
 --q proves that we can get n from compiling Var x
 --show we can get v from compiling Var x
 --then v must be equal to n
-sound .ℕ (V x) p n σ k q  with σ x | inspect σ x 
-sound .ℕ (V x) p n σ zero () | _ | ⟪ eq ⟫
-sound .ℕ (V x) p n σ (suc k) q | just v | ⟪ eq ⟫ = lem6 eq (lemma1 x σ k n q)
-sound .ℕ (V x) p n σ (suc k) q | nothing | ⟪ eq ⟫ = lem6 eq (lemma1 x σ k n q)  -- This should be false. q is a false statement.
+sound .ℕ (V x) p n σ k q  with inspect σ x 
+sound .ℕ (V x) p n σ zero () | ⟪ eq ⟫
+sound .ℕ (V x) p n σ (suc k) q | ⟪ eq ⟫ = sym-trans eq (varlemma1 x σ k n q) where
+
+  varlemma1 :  ∀ x σ k n → ⟨⟨ Var x ∷ [] ⟩⟩ [] , σ , (suc k) ≡ just (n ∷ []) → σ x ≡ just n
+  varlemma1 x σ k n p with σ x | inspect σ x
+  ... | just m | ⟪ eq ⟫ = cong-just-intro (cong-list (cong-just-elim p))
+    where
+      f : {A : Set} → A → Maybe A
+      f a = just a
+  varlemma1 x σ k n () | nothing | ⟪ eq ⟫
 
 --soundness for addition (Natalie)
-sound .ℕ (e1 ⊕ e2) p n σ k q = {!!}
+sound .ℕ (e1 ⊕ e2) p n σ k q with (⟦ e1 ⟧ σ) | (⟦ e2 ⟧ σ) | inspect ⟦ e1 ⟧ σ | inspect ⟦ e2 ⟧ σ 
+sound .ℕ (e1 ⊕ e2) p zero σ k q | just zero | just zero | ⟪ eq1 ⟫ | ⟪ eq2 ⟫ = refl
+sound .ℕ (e1 ⊕ e2) p n σ k q | just x1 | just x2 | ⟪ eq1 ⟫ | ⟪ eq2 ⟫ = {!!}
+sound .ℕ (e1 ⊕ e2) p n σ k q | just x | nothing | ⟪ eq1 ⟫ | ⟪ eq2 ⟫  = {!!}
+sound .ℕ (e1 ⊕ e2) p n σ k q | nothing | just x | ⟪ eq1 ⟫ | ⟪ eq2 ⟫  = {!!}
+sound .ℕ (e1 ⊕ e2) p n σ k q | nothing | nothing | ⟪ eq1 ⟫ | ⟪ eq2 ⟫ = {!!} where
+
+  lemplus : ∀ σ k n e1 e2 x1 x2 → ⟨⟨ (compile e1 ++ compile e2) ++ Add ∷ [] ⟩⟩ [] , σ , (suc k) ≡ just [ n ]
+                    → ⟦ e1 ⟧ σ ≡ just x1 → ⟦ e2 ⟧ σ ≡ just x2 
+                    → ⟦ e1 ⊕ e2 ⟧ σ ≡ just (x1 + x2)
+  lemplus σ k n e1 e2 x1 x2 = {!!}
 
 -- Soundness for subtraction
 sound .ℕ (e ⊝ e₁) p n σ zero q = {!!}
