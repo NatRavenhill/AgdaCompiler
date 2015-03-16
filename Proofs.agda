@@ -37,9 +37,6 @@ lem p = cong f p
       f (just x) = x
       f nothing = [] -- This case doesn't happen
 
-
-
-
 --
 lem5 : {A : Set} {a b : A} → a ≡ b → just a ≡ just b
 lem5 p = cong f p
@@ -97,13 +94,15 @@ sound .ℕ (V x) p n σ k q  with σ x | inspect σ x
 sound .ℕ (V x) p n σ zero () | _ | ⟪ eq ⟫
 sound .ℕ (V x) p n σ (suc k) q | just v | ⟪ eq ⟫ = lem6 eq (lemma1 x σ k n q)
 
-sound .ℕ (V x) p n σ (suc k) q | nothing | ⟪ eq ⟫ = {!!}  --this should be false. q is a false statement
+sound .ℕ (V x) p n σ (suc k) q | nothing | ⟪ eq ⟫ = lem6 eq (lemma1 x σ k n q)  -- This should be false. q is a false statement.
 
 --soundness for addition (Natalie)
-sound .ℕ (e ⊕ e₁) p n σ zero q = {!!}
+sound .ℕ (e ⊕ e₁) p n σ zero q = ?
 sound .ℕ (e ⊕ e₁) p n σ (suc k) q = {!!}
 
-sound .ℕ (e ⊝ e₁) p n σ k x = {!!}
+-- Soundness for subtraction
+sound .ℕ (e ⊝ e₁) p n σ zero q = ?
+sound .ℕ (e ⊝ e₁) p n σ (suc k) x = {!!}
 
 sound .𝔹 (¬ e) p n σ k x = {!!}
 
