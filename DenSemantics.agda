@@ -22,15 +22,15 @@ open import CompExp
 ⟦ N(v) ⟧ σ = just v
 ⟦ V(s) ⟧ σ = σ s
 
-⟦ E ⊕ E' ⟧ σ = ⟦ E ⟧ σ +' ⟦ E' ⟧ σ where
-  _+'_ : Maybe ℕ → Maybe ℕ → Maybe ℕ
-  just m +' just n = just (m + n)
-  _      +' _      = nothing
+⟦ E ⊕ E' ⟧ σ = ⟦ E ⟧ σ ⊕' ⟦ E' ⟧ σ where
+  _⊕'_ : Maybe ℕ → Maybe ℕ → Maybe ℕ
+  just m ⊕' just n = just (m + n)
+  _      ⊕' _      = nothing
 
-⟦ E ⊝ E' ⟧ σ = ⟦ E ⟧ σ -' ⟦ E' ⟧ σ where
- _-'_ : Maybe ℕ → Maybe ℕ → Maybe ℕ 
- just m -' just n = just (m ∸ n)
- _      -' _      = nothing
+⟦ E ⊝ E' ⟧ σ = ⟦ E ⟧ σ ⊝' ⟦ E' ⟧ σ where
+ _⊝'_ : Maybe ℕ → Maybe ℕ → Maybe ℕ 
+ just m ⊝' just n = just (m ∸ n)
+ _      ⊝' _      = nothing
 
 ⟦ ¬( E ) ⟧ σ with ⟦ E ⟧ σ
 ... | just zero = just (suc zero)

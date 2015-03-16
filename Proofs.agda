@@ -93,15 +93,13 @@ sound .ℕ (N (suc x)) p .(suc x) σ (suc k) refl = refl
 sound .ℕ (V x) p n σ k q  with σ x | inspect σ x 
 sound .ℕ (V x) p n σ zero () | _ | ⟪ eq ⟫
 sound .ℕ (V x) p n σ (suc k) q | just v | ⟪ eq ⟫ = lem6 eq (lemma1 x σ k n q)
-
 sound .ℕ (V x) p n σ (suc k) q | nothing | ⟪ eq ⟫ = lem6 eq (lemma1 x σ k n q)  -- This should be false. q is a false statement.
 
 --soundness for addition (Natalie)
-sound .ℕ (e ⊕ e₁) p n σ zero q = ?
-sound .ℕ (e ⊕ e₁) p n σ (suc k) q = {!!}
+sound .ℕ (e1 ⊕ e2) p n σ k q = {!!}
 
 -- Soundness for subtraction
-sound .ℕ (e ⊝ e₁) p n σ zero q = ?
+sound .ℕ (e ⊝ e₁) p n σ zero q = {!!}
 sound .ℕ (e ⊝ e₁) p n σ (suc k) x = {!!}
 
 sound .𝔹 (¬ e) p n σ k x = {!!}

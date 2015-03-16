@@ -133,7 +133,7 @@ aritht1 = ⟨⟨ compile ((N 28) ⊗ (N 123) ⊝ (N 6)) ⟩⟩ [] , (λ x -> jus
 aritht2 : Maybe stack
 aritht2 = ⟨⟨ compile ((N 999) ⊕ (N 321) ⊗ (N 123)) ⟩⟩ [] , (λ x -> just 0) , 10000
 
---
+-- 999 / 21 + 321 * 123 / 48 = 869
 aritht3 : Maybe stack
 aritht3 = ⟨⟨ compile ((N 999) ⊘ (N 21) ⊕ (N 321) ⊗ (N 123) ⊘ (N 48)) ⟩⟩ [] , (λ x -> just 0) , 100000
 
