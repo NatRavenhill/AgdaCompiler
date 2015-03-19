@@ -56,6 +56,7 @@ sym-trans refl refl = refl
 -- PROOF FOR SOUNDNESS --
 -------------------------
 --anything that has not been defined in compile will just be Err 
+--if k is zero at start will always return just []
 sound : (T : Set) (e : Exp T) (p : program) (n : ℕ) (σ : state) (k : ℕ) →
         ⟨⟨ compile e ⟩⟩ [] , σ , k ≡ just [ n ] → ⟦ e ⟧ σ ≡ just n 
 
@@ -105,7 +106,19 @@ sound .ℕ (e1 ⊕ e2) p n σ k q | nothing | nothing | ⟪ eq1 ⟫ | ⟪ eq2 �
 sound .ℕ (e ⊝ e₁) p n σ zero q = {!!}
 sound .ℕ (e ⊝ e₁) p n σ (suc k) x = {!!}
 
-sound .𝔹 (¬ e) p n σ k x = {!!}
+--match on each case of ⟦ e ⟧ σ
+sound .𝔹 (¬ e) p  n σ k x with compile e | ⟦ e ⟧ σ
+sound .𝔹 (¬ e) p n σ zero () | [] | d
+sound .𝔹 (¬ e) p n σ (suc k) () | [] | d
+sound .𝔹 (¬ e) p n σ zero () | a ∷ as | d
+sound .𝔹 (¬ e) p n σ (suc k) x | a ∷ as | d with ⟨⟨ a ∷ as ++ Not ∷ [] ⟩⟩ [] , σ , (suc k) 
+sound .𝔹 (¬ e) p n σ (suc k) () | a ∷ as | d | just []
+sound .𝔹 (¬ e) p 1 σ (suc k) x | a ∷ as | just zero | just m = refl
+sound .𝔹 (¬ e) p n σ (suc k) x | a ∷ as | just zero | just (suc zero ∷ []) = cong-just-intro (sym (cong-list (sym (cong-just-elim x))))
+sound .𝔹 (¬ e) p n σ (suc k) x | a ∷ as | just zero | just (b ∷ bs) = {!!}
+sound .𝔹 (¬ e) p n σ (suc k) x | a ∷ as | just (suc m) | just (b ∷ bs) = {!!}
+sound .𝔹 (¬ e) p n σ (suc k) x | a ∷ as | nothing | just (b ∷ bs) = {!!}
+sound .𝔹 (¬ e) p n σ (suc k) () | a ∷ as | d | nothing
 
 sound .𝔹 (e & e₁) p n σ k x = {!!}
 
@@ -130,13 +143,31 @@ sound .ℕ (for e do e₁) p n σ k x = {!!}
 ------------------------
 adeq : (T : Set) (e : Exp T) (p : program) (σ : state) (n : ℕ) →
         ⟦ e ⟧ σ ≡ just n → (∃ λ k → ⟨⟨ compile e ⟩⟩ [] , σ , k ≡ just [ n ])
-adeq .𝔹 (B x) p σ n x₁ = {!!}
-adeq .ℕ (N x) p σ n x₁ = {!!}
-adeq .ℕ (V x) p σ n x₁ = {!!}
-adeq .ℕ (e ⊕ e₁) p σ n x = {!!}
-adeq .ℕ (if_then_else e e₁ e₂) p σ n x = {!!}
+adeq .𝔹 (B true) p σ zero ()
+adeq .𝔹 (B true) p σ (suc zero) refl = suc zero , refl 
+adeq .𝔹 (B true) p σ (suc n) x =  {!!} --get this in one step, other steps are redundant?
+adeq .𝔹 (B false) p σ zero x = {!!}
+adeq .𝔹 (B false) p σ (suc n) ()
 
-adeq _ _ _ _ _ _ = {!!} 
+adeq .ℕ (N m) p σ n x = {!!}
+adeq .ℕ (V v) p σ n x = {!!}
+adeq .ℕ (e ⊕ e₁) p σ n x = {!!}
+adeq .ℕ (e ⊝ e₁) p σ n x = {!!}
+
+adeq .𝔹 (¬ e) p σ n x with compile e | ⟦ e ⟧ σ
+adeq .𝔹 (¬ e) p σ n x | l | just zero = {!!}
+adeq .𝔹 (¬ e) p σ n x | l | just (suc _) = {!!}
+adeq .𝔹 (¬ e) p σ n () | l | nothing
+
+adeq .𝔹 (e & e₁) p σ n x = {!!}
+adeq .𝔹 (e ∥ e₁) p σ n x = {!!}
+adeq .𝔹 (e <= e₁) p σ n x = {!!}
+adeq .𝔹 (e >= e₁) p σ n x = {!!}
+adeq .𝔹 (e AbstractSyntax.== e₁) p σ n x = {!!}
+adeq .ℕ (if_then_else e e₁ e₂) p σ n x = {!!}
+adeq .ℕ (e ⊗ e₁) p σ n x = {!!}
+adeq .ℕ (e ⊘ e₁) p σ n x = {!!}
+adeq .ℕ (for e do e₁) p σ n x = {!!}
               
 adeq-fail : (T : Set) (e : Exp T) (p : program) (σ : state) (n : ℕ) →
         ⟦ e ⟧ σ ≡ nothing → (∃ λ k → ⟨⟨ compile e ⟩⟩ [] , σ , k ≡ nothing)
