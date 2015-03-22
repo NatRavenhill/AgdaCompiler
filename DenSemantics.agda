@@ -22,7 +22,7 @@ open import CompExp
 ⟦ N(v) ⟧ σ = just v
 ⟦ V(s) ⟧ σ = σ s
 
-⟦ E ⊕ E' ⟧ σ = ⟦ E ⟧ σ ⊕' ⟦ E' ⟧ σ where
+⟦ E ⊕ E' ⟧ σ = ⟦ E' ⟧ σ ⊕' ⟦ E ⟧ σ where
   _⊕'_ : Maybe ℕ → Maybe ℕ → Maybe ℕ
   just m ⊕' just n = just (m + n)
   _      ⊕' _      = nothing

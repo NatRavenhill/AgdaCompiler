@@ -45,12 +45,31 @@ cong-just-intro p = cong f p
       f x = just x
 
 --
-cong-list : {A : Set} {a b : A} → (a ∷ []) ≡ (b ∷ []) → a ≡ b
+cong-list : {A : Set} {a b : A} → [ a ] ≡ [ b ] → a ≡ b
 cong-list refl = refl
 
 
 sym-trans : {A : Set} {a b c : A} → a ≡ b → a ≡ c → b ≡ c
 sym-trans refl refl = refl
+
+--⟨⟨ (compile e ++ compile e') ++ Add ∷ [] ⟩⟩ [] , σ , k ≡ ⟨⟨ Add ∷ [] ⟩⟩ (x2 ∷ x1 ∷ []) , σ , k
+--⟨⟨ Add ∷ [] ⟩⟩ (x2 ∷ x1 ∷ []) , σ , k ≡ just [x1 + x2]
+
+lemplus1 : ∀ σ k n e e' x1 x2 → ⟨⟨ (compile e ++ compile e') ++ [ Add ] ⟩⟩ [] , σ , k ≡ just [ n ]
+                               → ⟦ e      ⟧ σ ≡ just x1
+                               → ⟦ e'     ⟧ σ ≡ just x2 
+                               → ⟦ e ⊕ e' ⟧ σ ≡ just n
+lemplus1 σ k n e e' x1 x2 p q1 q2 with (⟦ e ⟧ σ) | (⟦ e' ⟧ σ)
+lemplus1 σ k n e e' x1 x2 p refl refl | just .x1 | just .x2 = {!!}
+lemplus1 σ k n e e' x1 x2 p q1 () | _ | nothing
+lemplus1 σ k n e e' x1 x2 p () q2 | nothing | _
+
+
+lemplus2 : ∀ σ k n e e' x1 x2 → ⟨⟨ compile e  ⟩⟩ [] , σ , k ≡ just [ x1 ]
+                              → ⟨⟨ compile e' ⟩⟩ [] , σ , k ≡ just [ x2 ]
+                              → ⟨⟨ (compile e ++ compile e') ++ [ Add ] ⟩⟩ [] , σ , k ≡ just [ n ]
+                              → n ≡ (x1 + x2)
+lemplus2 = {!!}
 
 -------------------------
 -- PROOF FOR SOUNDNESS --
@@ -71,41 +90,35 @@ sound .ℕ (N zero) p .0 σ (suc k) refl = refl
 sound .ℕ (N (suc x)) p n σ zero ()
 sound .ℕ (N (suc x)) p .(suc x) σ (suc k) refl = refl
 
-
 --soundness for Variables (Natalie & Mat & Yu)
 --q proves that we can get n from compiling Var x
 --show we can get v from compiling Var x
 --then v must be equal to n
 sound .ℕ (V x) p n σ k q  with inspect σ x 
 sound .ℕ (V x) p n σ zero () | ⟪ eq ⟫
-sound .ℕ (V x) p n σ (suc k) q | ⟪ eq ⟫ = sym-trans eq (varlemma1 x σ k n q) where
+sound .ℕ (V x) p n σ (suc k) q | ⟪ eq ⟫ = varlemma1 x σ k n q where
 
-  varlemma1 :  ∀ x σ k n → ⟨⟨ Var x ∷ [] ⟩⟩ [] , σ , (suc k) ≡ just (n ∷ []) → σ x ≡ just n
-  varlemma1 x σ k n p with σ x | inspect σ x
-  ... | just m | ⟪ eq ⟫ = cong-just-intro (cong-list (cong-just-elim p))
-    where
-      f : {A : Set} → A → Maybe A
-      f a = just a
-  varlemma1 x σ k n () | nothing | ⟪ eq ⟫
+  varlemma1 :  ∀ x σ k n → ⟨⟨ Var x ∷ [] ⟩⟩ [] , σ , (suc k) ≡ just [ n ] → σ x ≡ just n
+  varlemma1 x σ k n p with σ x
+  ... | just m = cong-just-intro (cong-list (cong-just-elim p))
+  varlemma1 x σ k n () | nothing
 
 --soundness for addition (Natalie)
 sound .ℕ (e1 ⊕ e2) p n σ k q with (⟦ e1 ⟧ σ) | (⟦ e2 ⟧ σ) | inspect ⟦ e1 ⟧ σ | inspect ⟦ e2 ⟧ σ 
 sound .ℕ (e1 ⊕ e2) p zero σ k q | just zero | just zero | ⟪ eq1 ⟫ | ⟪ eq2 ⟫ = refl
-sound .ℕ (e1 ⊕ e2) p n σ k q | just x1 | just x2 | ⟪ eq1 ⟫ | ⟪ eq2 ⟫ = {!!}
-sound .ℕ (e1 ⊕ e2) p n σ k q | just x | nothing | ⟪ eq1 ⟫ | ⟪ eq2 ⟫  = {!!}
-sound .ℕ (e1 ⊕ e2) p n σ k q | nothing | just x | ⟪ eq1 ⟫ | ⟪ eq2 ⟫  = {!!}
-sound .ℕ (e1 ⊕ e2) p n σ k q | nothing | nothing | ⟪ eq1 ⟫ | ⟪ eq2 ⟫ = {!!} where
+sound .ℕ (e1 ⊕ e2) p n    σ k q | a | b | ⟪ eq1 ⟫ | ⟪ eq2 ⟫ = {!!} where
 
-  lemplus : ∀ σ k n e1 e2 x1 x2 → ⟨⟨ (compile e1 ++ compile e2) ++ Add ∷ [] ⟩⟩ [] , σ , (suc k) ≡ just [ n ]
-                    → ⟦ e1 ⟧ σ ≡ just x1 → ⟦ e2 ⟧ σ ≡ just x2 
-                    → ⟦ e1 ⊕ e2 ⟧ σ ≡ just (x1 + x2)
-  lemplus σ k n e1 e2 x1 x2 = {!!}
+
 
 -- Soundness for subtraction
 sound .ℕ (e ⊝ e₁) p n σ zero q = {!!}
 sound .ℕ (e ⊝ e₁) p n σ (suc k) x = {!!}
 
-sound .𝔹 (¬ e) p n σ k x = {!!}
+-- Soundness for NOT
+sound .𝔹 (¬ e) p n σ k q with (⟦ e ⟧ σ) | inspect ⟦ ¬ e ⟧ σ
+sound .𝔹 (¬ e) p n σ k q | just zero | ⟪ eq ⟫ = {!!}
+sound .𝔹 (¬ e) p n σ k q | just (suc x) | ⟪ eq ⟫ = {!!}
+sound .𝔹 (¬ e) p n σ k q | nothing | ⟪ eq ⟫ = {!!}
 
 sound .𝔹 (e & e₁) p n σ k x = {!!}
 
