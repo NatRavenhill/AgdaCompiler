@@ -71,6 +71,22 @@ lemplus2 : ∀ σ k n e e' x1 x2 → ⟨⟨ compile e  ⟩⟩ [] , σ , k ≡ ju
                               → n ≡ (x1 + x2)
 lemplus2 = {!!}
 
+--from meeting
+lemma :  (T : Set) (e : Exp T) (p : program) (n m : ℕ) (σ : state) (k , k' , k'' : ℕ) (s , s' : stack) → 
+               ⟨⟨ compile e ++ p ⟩⟩ s , σ , k ≡ ⟨⟨ p ⟩⟩ (m ∷ s) , σ , k' → 
+               ⟨⟨ p ⟩⟩ (n ∷ s) , σ , k'' ≡ just s' →
+               ⟦ e ⟧ σ ≡ just n
+lemma  = {!!}
+
+
+----from meeting
+lemma2 :  {T : Set} (e e' : Exp T) (i : instr) (p : program) (m n : ℕ) (σ : state) (k k' : ℕ) (s : stack) → 
+               ⟨⟨ compile e ⟩⟩ s , σ , k ≡ just [ n ] → 
+               compile e ≡ compile e' ++ [ i ] →
+               ⟨⟨ compile e' ++ [ i ] ⟩⟩ s , σ , k ≡ ⟨⟨ [ i ] ⟩⟩ (m ∷ s) , σ , k' →
+               ⟦ e'  ⟧ σ ≡ just m
+lemma2 = λ e e' i p m n σ k k' s x x₁ x₂ → {!!}
+
 -------------------------
 -- PROOF FOR SOUNDNESS --
 -------------------------
@@ -105,9 +121,33 @@ sound .ℕ (V x) p n σ (suc k) q | ⟪ eq ⟫ = varlemma1 x σ k n q where
   varlemma1 x σ k n () | nothing
 
 --soundness for addition (Natalie)
+sound .ℕ (e1 ⊕ e2) p n σ k q ={!!}
+   where
+     soundAdd :  (e1 , e2 : Exp ℕ) (p : program) (n : ℕ) (σ : state) (k : ℕ) →
+        ⟨⟨ compile (e1 ⊕ e2) ⟩⟩ [] , σ , k ≡ just [ n ] →
+        ⟦ e1 ⊕ e2 ⟧ σ ≡ just n         
+     soundAdd e1 e2 _ p n σ k x = {!lemma!}
+      where
+        IH₁ : (x1 : ℕ) → ⟨⟨ compile e1 ⟩⟩ [] , σ , k ≡ just [ x1 ] → ⟦ e1 ⟧ σ ≡ just x1
+        IH₁ x1 = sound ℕ e1 p x1 σ k
+        IH₂ : (x2 : ℕ ) → ⟨⟨ compile e2 ⟩⟩ [] , σ , k ≡ just [ x2 ] → ⟦ e2 ⟧ σ ≡ just x2
+        IH₂ x2 = sound ℕ e2 p x2 σ k        
+        lemma1 : (p : program) (s , s' : stack) (k' , k'' : ℕ) (x1 , m : ℕ) → ⟨⟨ compile e1 ++ p ⟩⟩ s , σ , k ≡ ⟨⟨ p ⟩⟩ x1 ∷ s , σ , k'  → 
+                         ⟦ e1 ⟧ σ ≡ just x1
+        lemma1 p s k' x3 = {!!} 
+{-
 sound .ℕ (e1 ⊕ e2) p n σ k q with (⟦ e1 ⟧ σ) | (⟦ e2 ⟧ σ) | inspect ⟦ e1 ⟧ σ | inspect ⟦ e2 ⟧ σ 
 sound .ℕ (e1 ⊕ e2) p zero σ k q | just zero | just zero | ⟪ eq1 ⟫ | ⟪ eq2 ⟫ = refl
-sound .ℕ (e1 ⊕ e2) p n    σ k q | a | b | ⟪ eq1 ⟫ | ⟪ eq2 ⟫ = {!!} where
+sound .ℕ (e1 ⊕ e2) p n σ k q | just x1 | just x2 | ⟪ eq1 ⟫ | ⟪ eq2 ⟫ = {!!}
+sound .ℕ (e1 ⊕ e2) p n σ k q | just x | nothing | ⟪ eq1 ⟫ | ⟪ eq2 ⟫  = {!!}
+sound .ℕ (e1 ⊕ e2) p n σ k q | nothing | just x | ⟪ eq1 ⟫ | ⟪ eq2 ⟫  = {!!}
+sound .ℕ (e1 ⊕ e2) p n σ k q | nothing | nothing | ⟪ eq1 ⟫ | ⟪ eq2 ⟫ = {!!} where
+-}
+ {-lemplus : ∀ σ k n e1 e2 x1 x2 → ⟨⟨ (compile e1 ++ compile e2) ++ Add ∷ [] ⟩⟩ [] , σ , (suc k) ≡ just [ n ]
+                    → ⟦ e1 ⟧ σ ≡ just x1 → ⟦ e2 ⟧ σ ≡ just x2 
+                    → ⟦ e1 ⊕ e2 ⟧ σ ≡ just (x1 + x2)
+      lemplus σ k n e1 e2 x1 x2 = {!!}-}
+
 
 
 
