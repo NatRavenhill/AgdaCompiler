@@ -1,6 +1,0 @@
-We have structured our solution into multiple files. The structure is as follows:
-- AbstractSyntax : Contains the syntax for the operations of the stack machine.
-- CompExp : Contains the compiler and stack-machine.
-- DenSemantics :Contains the denotational semantics for the instructions of the language.
-- Proofs : Contains the proofs of soundness and adequacy
--Main : 
