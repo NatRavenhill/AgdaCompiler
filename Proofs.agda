@@ -54,9 +54,24 @@ cong-list refl = refl
 sym-trans : {A : Set} {a b c : A} → a ≡ b → a ≡ c → b ≡ c
 sym-trans refl refl = refl
 
---⟨⟨ (compile e ++ compile e') ++ Add ∷ [] ⟩⟩ [] , σ , k ≡ ⟨⟨ Add ∷ [] ⟩⟩ (x2 ∷ x1 ∷ []) , σ , k
---⟨⟨ Add ∷ [] ⟩⟩ (x2 ∷ x1 ∷ []) , σ , k ≡ just [x1 + x2]
 
+--In our meeting we decided we needed to prove a more general lemma on the entire list of instructions, but we had difficulty working out how to prove this and if our type was correct:
+lemma :  (T : Set) (e : Exp T) (p : program) (n m : ℕ) (σ : state) (k , k' , k'' : ℕ) (s , s' : stack) → 
+               ⟨⟨ compile e ++ p ⟩⟩ s , σ , k ≡ ⟨⟨ p ⟩⟩ (m ∷ s) , σ , k' → 
+               ⟨⟨ p ⟩⟩ (n ∷ s) , σ , k'' ≡ just s' →
+               ⟦ e ⟧ σ ≡ just n
+lemma  = {!!}
+
+----from meeting
+lemma2 :  {T : Set} (e e' : Exp T) (i : instr) (p : program) (m n : ℕ) (σ : state) (k k' : ℕ) (s : stack) → 
+               ⟨⟨ compile e ⟩⟩ s , σ , k ≡ just [ n ] → 
+               compile e ≡ compile e' ++ [ i ] →
+               ⟨⟨ compile e' ++ [ i ] ⟩⟩ s , σ , k ≡ ⟨⟨ [ i ] ⟩⟩ (m ∷ s) , σ , k' →
+               ⟦ e'  ⟧ σ ≡ just m
+lemma2 = λ e e' i p m n σ k k' s x x₁ x₂ → {!!}
+
+
+--What follows is our attempts at this on the addition operator:
 lemplus1 : ∀ σ k n e e' x1 x2 → ⟨⟨ (compile e ++ compile e') ++ [ Add ] ⟩⟩ [] , σ , k ≡ just [ n ]
                                → ⟦ e      ⟧ σ ≡ just x1
                                → ⟦ e'     ⟧ σ ≡ just x2 
@@ -66,28 +81,12 @@ lemplus1 σ k n e e' x1 x2 p refl refl | just .x1 | just .x2 = {!!}
 lemplus1 σ k n e e' x1 x2 p q1 () | _ | nothing
 lemplus1 σ k n e e' x1 x2 p () q2 | nothing | _
 
-
-lemplus2 : ∀ σ k n e e' x1 x2 → ⟨⟨ compile e  ⟩⟩ [] , σ , k ≡ just [ x1 ]
+--This has yellow highlighting so has been commented out
+{-lemplus2 : ∀ σ k n e e' x1 x2 → ⟨⟨ compile e  ⟩⟩ [] , σ , k ≡ just [ x1 ]
                               → ⟨⟨ compile e' ⟩⟩ [] , σ , k ≡ just [ x2 ]
                               → ⟨⟨ (compile e ++ compile e') ++ [ Add ] ⟩⟩ [] , σ , k ≡ just [ n ]
                               → n ≡ (x1 + x2)
-lemplus2 = {!!}
-
---from meeting
-lemma :  (T : Set) (e : Exp T) (p : program) (n m : ℕ) (σ : state) (k , k' , k'' : ℕ) (s , s' : stack) → 
-               ⟨⟨ compile e ++ p ⟩⟩ s , σ , k ≡ ⟨⟨ p ⟩⟩ (m ∷ s) , σ , k' → 
-               ⟨⟨ p ⟩⟩ (n ∷ s) , σ , k'' ≡ just s' →
-               ⟦ e ⟧ σ ≡ just n
-lemma  = {!!}
-
-
-----from meeting
-lemma2 :  {T : Set} (e e' : Exp T) (i : instr) (p : program) (m n : ℕ) (σ : state) (k k' : ℕ) (s : stack) → 
-               ⟨⟨ compile e ⟩⟩ s , σ , k ≡ just [ n ] → 
-               compile e ≡ compile e' ++ [ i ] →
-               ⟨⟨ compile e' ++ [ i ] ⟩⟩ s , σ , k ≡ ⟨⟨ [ i ] ⟩⟩ (m ∷ s) , σ , k' →
-               ⟦ e'  ⟧ σ ≡ just m
-lemma2 = λ e e' i p m n σ k k' s x x₁ x₂ → {!!}
+lemplus2 = {!!}-}
 
 -------------------------
 -- PROOF FOR SOUNDNESS --
@@ -177,6 +176,27 @@ soundAdd2 e1 e2 p n σ k q | nothing | nothing | ⟪ eq1 ⟫ | ⟪ eq2 ⟫ = {!!
 
 
 
+--(15/04) We had another attempt at tackling th soundness proof by altering our lemma for the whole list:
+--given a proof that evaluating the instructions given by compiling e, with an empty stack gives just vx, we can prove that we will have vx on the stack and the remaining instructions to be processed.
+lem1 : (T : Set) (e : Exp T) (xs : List instr) (s : stack) (σ : state) (k k' vx : ℕ) →
+           ⟨⟨ compile e ⟩⟩ [] , σ , k ≡ just [ vx ] →
+           ⟨⟨ compile e ++ xs ⟩⟩ s , σ , k ≡ ⟨⟨ xs ⟩⟩ (vx ∷ s) , σ , k'
+lem1 = {!!}
+
+--This was our proof for addition we did on paper that day, but it was not so easy to implement in Agda!
+{-lemEx : ⟨⟨ compile (a ⊕ b) ⟩⟩ [] , σ , k ≡  just [ n ] →  -- premise inferred by agda
+             ⟨⟨ compile a ++ compile b ++ [ Add ] ⟩⟩ [] , σ , k ≡  just [ n ] → --lem1 with a
+             ⟨⟨ compile b ++ [ Add ] ⟩⟩ [ va ] , σ , k ≡  just [ n ] → --lem1 with b
+             ⟨⟨ [ Add ] ⟩⟩ [ vb , va ] , σ , k ≡  just [ n ] →
+             ⟨⟨ [] ⟩⟩ [ vb + va ] , σ , k ≡  just [ n ] →
+             just [ vb + va ] ≡  just [ n ] →
+             [ vb + va ] ≡ [ n ] →
+             ( vb + va ) ≡ ( n ) →
+             just ( vb + va ) ≡ just n →
+             just  vb ⊕' just va ≡ just n →
+             ⟦ b ⟧ σ ⊕' ⟦ a ⟧ σ  ≡ just n-}
+
+
 ------------------------
 -- PROOF FOR ADEQUACY --
 ------------------------
@@ -189,6 +209,7 @@ adeq .𝔹 (B false) p σ zero x = {!!}
 adeq .𝔹 (B false) p σ (suc n) ()
 
 adeq .ℕ (N m) p σ n x = {!!}
+
 adeq .ℕ (V v) p σ n x = {!!}
 adeq .ℕ (e ⊕ e₁) p σ n x = {!!}
 adeq .ℕ (e ⊝ e₁) p σ n x = {!!}
@@ -210,4 +231,26 @@ adeq .ℕ (for e do e₁) p σ n x = {!!}
               
 adeq-fail : (T : Set) (e : Exp T) (p : program) (σ : state) (n : ℕ) →
         ⟦ e ⟧ σ ≡ nothing → (∃ λ k → ⟨⟨ compile e ⟩⟩ [] , σ , k ≡ nothing)
-adeq-fail = {!!}
+adeq-fail .𝔹 (B true) p σ n () -- can't get nothing from booleans
+adeq-fail .𝔹 (B false) p σ n ()
+
+adeq-fail .ℕ (N x) p σ n ()
+
+adeq-fail .ℕ (V x) p σ n q with σ x
+adeq-fail .ℕ (V x) p σ n () | just m
+adeq-fail .ℕ (V x) p σ n q | nothing = {!!}
+
+adeq-fail .ℕ (e ⊕ e₁) p σ n x = {!!}
+adeq-fail .ℕ (e ⊝ e₁) p σ n x = {!!}
+
+adeq-fail .𝔹 (¬ e) p σ n x = {!!}
+
+adeq-fail .𝔹 (e & e₁) p σ n x = {!!}
+adeq-fail .𝔹 (e ∥ e₁) p σ n x = {!!}
+adeq-fail .𝔹 (e <= e₁) p σ n x = {!!}
+adeq-fail .𝔹 (e >= e₁) p σ n x = {!!}
+adeq-fail .𝔹 (e AbstractSyntax.== e₁) p σ n x = {!!}
+adeq-fail .ℕ (if_then_else e e₁ e₂) p σ n x = {!!}
+adeq-fail .ℕ (e ⊗ e₁) p σ n x = {!!}
+adeq-fail .ℕ (e ⊘ e₁) p σ n x = {!!}
+adeq-fail .ℕ (for e do e₁) p σ n x = {!!}
