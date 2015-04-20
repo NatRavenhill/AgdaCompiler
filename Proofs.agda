@@ -111,9 +111,8 @@ sound .ℕ (N (suc x)) p .(suc x) σ (suc k) refl = refl
 --q proves that we can get n from compiling Var x
 --show we can get v from compiling Var x
 --then v must be equal to n
-sound .ℕ (V x) p n σ k q  with inspect σ x 
-sound .ℕ (V x) p n σ zero () | ⟪ eq ⟫
-sound .ℕ (V x) p n σ (suc k) q | ⟪ eq ⟫ = varlemma1 x σ k n q where
+sound .ℕ (V x) p n σ zero ()
+sound .ℕ (V x) p n σ (suc k) q = varlemma1 x σ k n q where
 
   varlemma1 :  ∀ x σ k n → ⟨⟨ Var x ∷ [] ⟩⟩ [] , σ , (suc k) ≡ just [ n ] → σ x ≡ just n
   varlemma1 x σ k n p with σ x
