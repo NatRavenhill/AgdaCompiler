@@ -9,6 +9,4 @@ In the compilation we added the compilation for Booleans, using Val 1 to represe
 
 -Main - contains more examples
 
--Proofs : Our attempt at the proof for soundness is contained in this file. We found proving soundness for Booleans.
-
--Soundness - Description of how we tried to pove soundness
+-Proofs : Our partial proofs for soundness and adequacy is contained in this file and an explanation of our attempts.
